@@ -1,0 +1,28 @@
+{
+    "placeId": "DocId",
+    "categories": {
+        "_id": "5f65ce60b120f9151fdf5af6",
+        "categoryName": "Waterfalls",
+        "pin": "pin_waterfall-2021-01-10T11-11-29.799Z.png",
+        "sortId": 3,
+        "categoryImage": "waterfall-01-2021-01-10T11-14-16.932Z.png"
+    },
+    "places": {
+        "placeName": "Bissa Waterfall",
+        "facilities": [],
+        "_id": "5fa624984015323580067e84",
+        "province": "Punjab",
+        "city": "Rawalpindi",
+        "latitude": "34.0010829",
+        "createdDate": "2020-11-07T04:37:44.029Z",
+        "longititude": "73.2783972",
+        "description": "There is a gorgeous spot at a distance of 30 km from Islamabad, the capital of Pakistan, which is no less than any other beautiful place. It's a gorgeous waterfall situated in Bissa UC Karore Rawalpindi Village. Just on the 2-hour trip to Islamabad. Following Lehtrar Road towards Karori Valley is the easiest way to go to Karori. The water in this waterfall usually falls in the Monsoon Season. A visit to this waterfall in August and September is preferred.",
+        "image": [
+            "Bissa-2021-01-10T17-35-09.924Z.png"
+        ],
+        "experienceCount": 0,
+        "questionsCount": 0,
+        "storiesCount": 1,
+        "address": "Bissa Village, Karore Valley, Kotli Sattian, Rawalpindi, Punjab"
+    }
+}

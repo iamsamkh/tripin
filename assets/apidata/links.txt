@@ -1,0 +1,3 @@
+https://ua4poje1el.execute-api.ap-south-1.amazonaws.com/prod/user/get-categories-pak-map/
+
+https://d3b4d950pk995t.cloudfront.net/Khadomi-Waterfall-2021-01-11T11-37-50.067Z.jpg
