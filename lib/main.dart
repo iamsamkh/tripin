@@ -5,13 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:tripin/blocs/manage_places_bloc.dart';
-import 'package:tripin/blocs/view_booking_bloc.dart';
-import 'package:tripin/blocs/view_events_bloc.dart';
+import 'package:tripin/blocs/manage_bookings_bloc.dart';
 import '../blocs/blocs.dart';
 import '../pages/splash.dart';
-import 'blocs/manage_event_bloc.dart';
-import 'blocs/sp_state_two.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -73,27 +69,36 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider<FeaturedBloc>(
             create: (context) => FeaturedBloc(),
           ),
-          ChangeNotifierProvider<SearchBloc>(create: (context) => SearchBloc()),
+          ChangeNotifierProvider<SearchBloc>(
+            create: (context) => SearchBloc(),
+          ),
           ChangeNotifierProvider<NotificationBloc>(
-              create: (context) => NotificationBloc()),
+            create: (context) => NotificationBloc(),
+          ),
           ChangeNotifierProvider<CategoriesBloc>(
-              create: (context) => CategoriesBloc()),
-          ChangeNotifierProvider<SpecialStateOneBloc>(
-              create: (context) => SpecialStateOneBloc()),
-          ChangeNotifierProvider<SpecialStateTwoBloc>(
-              create: (context) => SpecialStateTwoBloc()),
+            create: (context) => CategoriesBloc(),
+          ),
           ChangeNotifierProvider<OtherPlacesBloc>(
-              create: (context) => OtherPlacesBloc()),
+            create: (context) => OtherPlacesBloc(),
+          ),
           ChangeNotifierProvider<AdsBloc>(
-            create: (context) => AdsBloc()),
+            create: (context) => AdsBloc(),
+          ),
           ChangeNotifierProvider<ManagePlacesBloc>(
-            create: (context) => ManagePlacesBloc()),
-            ChangeNotifierProvider<ViewEventBloc>(
-            create: (context) => ViewEventBloc()),
-            ChangeNotifierProvider<ManageEventBloc>(
-            create: (context) => ManageEventBloc()),
-            ChangeNotifierProvider<ViewBookingBloc>(
-            create: (context) => ViewBookingBloc()),
+            create: (context) => ManagePlacesBloc(),
+          ),
+          ChangeNotifierProvider<ViewEventBloc>(
+            create: (context) => ViewEventBloc(),
+          ),
+          ChangeNotifierProvider<ManageEventBloc>(
+            create: (context) => ManageEventBloc(),
+          ),
+          ChangeNotifierProvider<ViewBookingBloc>(
+            create: (context) => ViewBookingBloc(),
+          ),
+          ChangeNotifierProvider<ManageBookingsBloc>(
+            create: (context) => ManageBookingsBloc(),
+          ),
         ],
         child: MaterialApp(
             supportedLocales: context.supportedLocales,

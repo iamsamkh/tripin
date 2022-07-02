@@ -10,12 +10,12 @@ class OtherPlacesBloc extends ChangeNotifier{
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
  
 
-  Future getData(String provinceName, String placeId) async {
+  Future getData(String categoryId, String placeId) async {
     _data.clear();
     QuerySnapshot rawData;
       rawData = await firestore
           .collection('placesN')
-          .where('province', isEqualTo: provinceName)
+          .where('category', isEqualTo: categoryId)
           .orderBy('loveCount', descending: true)
           .limit(6)
           .get();
@@ -24,8 +24,6 @@ class OtherPlacesBloc extends ChangeNotifier{
       _snap.addAll(rawData.docs.skipWhile((value) => value['placeId'] == placeId));
       _data = _snap.map((e) => Place.fromFirestore(e)).toList();
       notifyListeners();
-    
-    
   }
 
   onRefresh(mounted, String stateName, String timestamp) {

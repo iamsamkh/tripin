@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:toast/toast.dart';
 import 'package:tripin/blocs/view_events_bloc.dart';
 import 'package:tripin/pages/book_event.dart';
+import 'package:tripin/utils/toast.dart';
 import '../blocs/sign_in_bloc.dart';
 import '../models/event.dart';
 import '../utils/empty.dart';
@@ -75,6 +77,11 @@ class _ViewEventsState extends State<ViewEvents>
               child: const Icon(Icons.filter_list_outlined),
               itemBuilder: (BuildContext context) {
                 return <PopupMenuItem>[
+                  if(_filterBy != '')
+                  const PopupMenuItem(
+                    child: Text('Remove Filter'),
+                    value: '',
+                  ),
                   const PopupMenuItem(
                     child: Text('Active'),
                     value: 'active',
@@ -96,17 +103,6 @@ class _ViewEventsState extends State<ViewEvents>
               onSelected: (value) {
                 setState(() {
                   _filterBy = value.toString();
-                  // if (value == 'pendingApproval') {
-                  //   _filterBy = 'pendingApproval';
-                  // } else if (value == 'pendingApproval') {
-                  //   _filterBy = 'pendingApproval';
-                  // } else if (value == 'approved') {
-                  //   _filterBy = 'approved';
-                  // } else if (value == 'rejected') {
-                  //   _filterBy = 'rejected';
-                  // } else {
-                  //   _filterBy = '';
-                  // }
                 });
                 bb.afterPopSelection(value, mounted, _filterBy);
               }),
@@ -178,6 +174,7 @@ class _ListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ToastContext().init(context); //
     return InkWell(
       child: Container(
         margin: const EdgeInsets.only(top: 5, bottom: 10),
@@ -215,18 +212,22 @@ class _ListItem extends StatelessWidget {
                               padding: const EdgeInsets.all(3.0),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(6.0),
-                                color: eventData.status == 'pendingApproval'
+                                color: eventData.status == 'booked'
                                     ? Colors.orangeAccent
                                     : eventData.status == 'active'
                                         ? Colors.green[500]
-                                        : Colors.red[400],
+                                        : eventData.status == 'completed'
+                                            ? Colors.blue[500]
+                                            : Colors.red[400],
                               ),
                               child: Text(
-                                eventData.status == 'pendingApproval'
-                                    ? 'Pending Approval'
+                                eventData.status == 'booked'
+                                    ? 'Booking Completed'
                                     : eventData.status == 'active'
                                         ? 'Active'
-                                        : 'Rejected',
+                                        : eventData.status == 'completed'
+                                            ? 'Completed'
+                                            : 'Cancelled',
                                 style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
@@ -354,8 +355,13 @@ class _ListItem extends StatelessWidget {
                                   if (_guestUser == true) {
                                     openSignInDialog(context);
                                   } else {
-                                    nextScreenPopup(
+                                    if(eventData.status == 'active'){
+                                      nextScreenPopup(
                                         context, BookEvent(e: eventData));
+                                    } else{
+                                      openToast(context, 'Sorry! This event is not active');
+                                    }
+                                    
                                   }
                                 },
                                 child: const Text('Book Event')),

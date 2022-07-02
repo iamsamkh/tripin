@@ -3,18 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:tripin/blocs/sign_in_bloc.dart';
 import 'package:tripin/blocs/view_booking_bloc.dart';
-import 'package:tripin/pages/book_event.dart';
-import '../blocs/sign_in_bloc.dart';
 import '../models/booking.dart';
-import '../models/event.dart';
 import '../utils/empty.dart';
 import '../utils/loading_cards.dart';
 import 'package:easy_localization/easy_localization.dart';
-
-import '../utils/next_screen.dart';
-import '../utils/sign_in_dialog.dart';
-import 'event_details.dart';
 
 class ViewBooking extends StatefulWidget {
   const ViewBooking({Key? key}) : super(key: key);
@@ -34,6 +28,7 @@ class _ViewBookingState extends State<ViewBooking>
     super.initState();
     Future.delayed(const Duration(milliseconds: 0)).then((value) {
       controller.addListener(_scrollListener);
+      final sb = context.read<SignInBloc>();
       context.read<ViewBookingBloc>().getData(mounted, _filterBy);
     });
   }
@@ -63,7 +58,6 @@ class _ViewBookingState extends State<ViewBooking>
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        automaticallyImplyLeading: false,
         title: const Text('Bookings').tr(),
         titleTextStyle: const TextStyle(
           fontWeight: FontWeight.w400,
@@ -76,17 +70,18 @@ class _ViewBookingState extends State<ViewBooking>
               child: const Icon(Icons.filter_list_outlined),
               itemBuilder: (BuildContext context) {
                 return <PopupMenuItem>[
+                  if(_filterBy != '')
                   const PopupMenuItem(
-                    child: Text('Active'),
-                    value: 'active',
+                    child: Text('Remove Filter'),
+                    value: '',
                   ),
                   const PopupMenuItem(
-                    child: Text('Completed'),
-                    value: 'completed',
+                    child: Text('Pending Payment'),
+                    value: 'pending',
                   ),
                   const PopupMenuItem(
-                    child: Text('Booking Closed'),
-                    value: 'booked',
+                    child: Text('Paid'),
+                    value: 'paid',
                   ),
                   const PopupMenuItem(
                     child: Text('Cancelled'),
@@ -97,17 +92,6 @@ class _ViewBookingState extends State<ViewBooking>
               onSelected: (value) {
                 setState(() {
                   _filterBy = value.toString();
-                  // if (value == 'pendingApproval') {
-                  //   _filterBy = 'pendingApproval';
-                  // } else if (value == 'pendingApproval') {
-                  //   _filterBy = 'pendingApproval';
-                  // } else if (value == 'approved') {
-                  //   _filterBy = 'approved';
-                  // } else if (value == 'rejected') {
-                  //   _filterBy = 'rejected';
-                  // } else {
-                  //   _filterBy = '';
-                  // }
                 });
                 bb.afterPopSelection(value, mounted, _filterBy);
               }),
@@ -130,8 +114,8 @@ class _ViewBookingState extends State<ViewBooking>
                     height: MediaQuery.of(context).size.height * 0.35,
                   ),
                   const EmptyPage(
-                      icon: FontAwesomeIcons.landmark,
-                      message: 'No Event Found',
+                      icon: FontAwesomeIcons.calendarXmark,
+                      message: 'No Booking Found',
                       message1: ''),
                 ],
               )
@@ -216,18 +200,18 @@ class _ListItem extends StatelessWidget {
                               padding: const EdgeInsets.all(3.0),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(6.0),
-                                color: bookingData.bookingStatus == 'pendingApproval'
+                                color: bookingData.bookingStatus == 'pending'
                                     ? Colors.orangeAccent
-                                    : bookingData.bookingStatus == 'active'
+                                    : bookingData.bookingStatus == 'paid'
                                         ? Colors.green[500]
                                         : Colors.red[400],
                               ),
                               child: Text(
-                                bookingData.bookingStatus == 'pendingApproval'
-                                    ? 'Pending Approval'
-                                    : bookingData.bookingStatus == 'active'
-                                        ? 'Active'
-                                        : 'Rejected',
+                                bookingData.bookingStatus == 'pending'
+                                    ? 'Pending Payment'
+                                    : bookingData.bookingStatus == 'paid'
+                                        ? 'Paid'
+                                        : 'Cancelled',
                                 style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,

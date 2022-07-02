@@ -11,39 +11,28 @@ class DonePage extends StatefulWidget {
 }
 
 class _DonePageState extends State<DonePage> {
-
-
   @override
   void initState() {
-    Future.delayed(Duration(milliseconds: 2000))
-    .then((value) => nextScreenCloseOthers(context, IntroPage()));
+    Future.delayed(const Duration(milliseconds: 2000))
+        .then((value) => nextScreenCloseOthers(context, const IntroPage()));
     super.initState();
   }
 
-
-  
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
-        child: Container(
+        child: SizedBox(
           height: 150,
           width: 150,
           child: FlareActor(
-              'assets/flr/success.flr',
-              animation : 'success',
-              
-              alignment: Alignment.center,
-              fit: BoxFit.contain,
-
-            
-            
-            
-            ),
+            'assets/flr/success.flr',
+            animation: 'success',
+            alignment: Alignment.center,
+            fit: BoxFit.contain,
+          ),
         ),
-        
-      
-    ),
+      ),
     );
   }
 }

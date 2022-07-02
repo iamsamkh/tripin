@@ -7,7 +7,7 @@ import '../blocs/blog_bloc.dart';
 import '../blocs/categories_bloc.dart';
 import '../models/colors.dart';
 import '../models/category.dart';
-import '../pages/state_based_places.dart';
+import 'categories_based_places.dart';
 import '../utils/empty.dart';
 import '../utils/next_screen.dart';
 import '../widgets/custom_cache_image.dart';
@@ -23,13 +23,11 @@ class CategoriesPage extends StatefulWidget {
 
 class _CategoriesPageState extends State<CategoriesPage>
     with AutomaticKeepAliveClientMixin {
-      // late ScrollController controller;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    // controller.addListener(_scrollListener);
     Future.delayed(const Duration(milliseconds: 0)).then((value) {
       context.read<CategoriesBloc>().getData(mounted);
     });
@@ -37,20 +35,8 @@ class _CategoriesPageState extends State<CategoriesPage>
 
   @override
   void dispose() {
-    // controller.removeListener(_scrollListener);
     super.dispose();
   }
-
-  // void _scrollListener() {
-  //   final db = context.read<BlogBloc>();
-
-  //   if (!db.isLoading) {
-  //     if (controller.position.pixels == controller.position.maxScrollExtent) {
-  //       context.read<CategoriesBloc>().setLoading(true);
-  //       context.read<CategoriesBloc>().getData(mounted);
-  //     }
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -60,14 +46,13 @@ class _CategoriesPageState extends State<CategoriesPage>
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
         title: const Text('Categories').tr(),
         titleTextStyle: const TextStyle(
-            fontWeight: FontWeight.w400,
-            fontSize: 16,
-            color: Colors.black,
-            
-          ),
+          fontWeight: FontWeight.w400,
+          fontSize: 16,
+          color: Colors.black,
+        ),
         elevation: 0,
         actions: <Widget>[
           IconButton(
@@ -109,9 +94,8 @@ class _CategoriesPageState extends State<CategoriesPage>
                     return _ItemList(d: sb.data[index]);
                   }
                   return Opacity(
-                    opacity: sb.isLoading ? 1.0 : 0.0,
-                    child: LoadingCard(height: 140.h)
-                  );
+                      opacity: sb.isLoading ? 1.0 : 0.0,
+                      child: LoadingCard(height: 140.h));
                 },
               ),
         onRefresh: () async {

@@ -44,9 +44,6 @@ class _IntroPageState extends State<IntroPage> {
               ],
             ),
           ),
-          // SizedBox(
-          //   height: 30.w,
-          // ),
           Container(
             height: 45,
             width: w * 0.70,
@@ -98,8 +95,7 @@ class IntroView extends StatelessWidget {
         children: <Widget>[
           Container(
             alignment: Alignment.center,
-            height: h * 0.38,
-            // width: w * 0.38,
+            height: h * 0.34,
             child: Image.asset(image, fit: BoxFit.contain,),
           ),
           SizedBox(

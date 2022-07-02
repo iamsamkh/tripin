@@ -6,8 +6,6 @@ import '../blocs/popular_places_bloc.dart';
 import '../blocs/recent_places_bloc.dart';
 import '../blocs/recommanded_places_bloc.dart';
 import '../blocs/sign_in_bloc.dart';
-import '../blocs/sp_state_one.dart';
-import '../blocs/sp_state_two.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../config/config.dart';
 import '../pages/profile.dart';
@@ -17,8 +15,6 @@ import '../widgets/featured_places.dart';
 import '../widgets/popular_places.dart';
 import '../widgets/recent_places.dart';
 import '../widgets/recommended_places.dart';
-import '../widgets/special_state1.dart';
-import '../widgets/special_state2.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class Explore extends StatefulWidget {
@@ -36,8 +32,6 @@ class _ExploreState extends State<Explore> with AutomaticKeepAliveClientMixin {
       context.read<FeaturedBloc>().getData();
       context.read<PopularPlacesBloc>().getData();
       context.read<RecentPlacesBloc>().getData();
-      // context.read<SpecialStateOneBloc>().getData();
-      // context.read<SpecialStateTwoBloc>().getData();
       context.read<RecommandedPlacesBloc>().getData();
     });
   }
@@ -53,8 +47,6 @@ class _ExploreState extends State<Explore> with AutomaticKeepAliveClientMixin {
               context.read<FeaturedBloc>().onRefresh();
               context.read<PopularPlacesBloc>().onRefresh(mounted);
               context.read<RecentPlacesBloc>().onRefresh(mounted);
-              // context.read<SpecialStateOneBloc>().onRefresh(mounted);
-              // context.read<SpecialStateTwoBloc>().onRefresh(mounted);
               context.read<RecommandedPlacesBloc>().onRefresh(mounted);
             },
             child: SingleChildScrollView(
@@ -64,8 +56,6 @@ class _ExploreState extends State<Explore> with AutomaticKeepAliveClientMixin {
                   Featured(),
                   PopularPlaces(),
                   RecentPlaces(),
-                  // SpecialStateOne(),
-                  // SpecialStateTwo(),
                   RecommendedPlaces()
                 ],
               ),
@@ -133,7 +123,7 @@ class Header extends StatelessWidget {
                                 fit: BoxFit.cover)),
                       ),
                 onTap: () {
-                  nextScreen(context, const ProfilePage());
+                  nextScreen(context, const ProfilePage(enableBack: true,));
                 },
               )
             ],

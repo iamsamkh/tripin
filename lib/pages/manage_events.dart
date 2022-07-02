@@ -4,9 +4,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:toast/toast.dart';
 import 'package:tripin/blocs/manage_event_bloc.dart';
 import 'package:tripin/pages/add_event.dart';
-import '../models/Place.dart';
+import 'package:tripin/utils/toast.dart';
 import '../models/event.dart';
 import '../utils/empty.dart';
 import '../utils/loading_cards.dart';
@@ -61,7 +62,7 @@ class _ManageEventsState extends State<ManageEvents>
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
         title: const Text('Create/Manage Events').tr(),
         titleTextStyle: const TextStyle(
           fontWeight: FontWeight.w400,
@@ -74,6 +75,11 @@ class _ManageEventsState extends State<ManageEvents>
               child: const Icon(Icons.filter_list_outlined),
               itemBuilder: (BuildContext context) {
                 return <PopupMenuItem>[
+                  if(_filterBy != '')
+                  const PopupMenuItem(
+                    child: Text('Remove Filter'),
+                    value: '',
+                  ),
                   const PopupMenuItem(
                     child: Text('Active'),
                     value: 'active',
@@ -95,17 +101,6 @@ class _ManageEventsState extends State<ManageEvents>
               onSelected: (value) {
                 setState(() {
                   _filterBy = value.toString();
-                  // if (value == 'pendingApproval') {
-                  //   _filterBy = 'pendingApproval';
-                  // } else if (value == 'pendingApproval') {
-                  //   _filterBy = 'pendingApproval';
-                  // } else if (value == 'approved') {
-                  //   _filterBy = 'approved';
-                  // } else if (value == 'rejected') {
-                  //   _filterBy = 'rejected';
-                  // } else {
-                  //   _filterBy = '';
-                  // }
                 });
                 bb.afterPopSelection(value, mounted, _filterBy);
               }),
@@ -181,28 +176,66 @@ class _ManageEventsState extends State<ManageEvents>
   bool get wantKeepAlive => true;
 }
 
-class _ListItem extends StatelessWidget {
+class _ListItem extends StatefulWidget {
   final Event d;
   const _ListItem({Key? key, required this.d}) : super(key: key);
 
   @override
+  State<_ListItem> createState() => _ListItemState();
+}
+
+class _ListItemState extends State<_ListItem> {
+  @override
+  void initState() {
+    super.initState();
+    status = widget.d.status;
+  }
+
+  String? status;
+  @override
   Widget build(BuildContext context) {
+    final eb = context.watch<ManageEventBloc>();
+    ToastContext().init(context); //
     return InkWell(
       child: Container(
         margin: const EdgeInsets.only(top: 5, bottom: 10),
         child: Slidable(
           endActionPane: ActionPane(
             motion: const ScrollMotion(),
-            children:  [
+            children: [
               SlidableAction(
-                onPressed: (value){},
+                onPressed: (value) {
+                  if (widget.d.status=='active' || widget.d.status == 'booked') {
+                    eb.changeEventStatus(widget.d.eventId, 'completed').then((value) {
+                      if (value) {
+                        setState(() {
+                          status = 'completed';
+                        });
+                      }
+                    });
+                  }else{
+                    openToast(context, 'This event is not active');
+                  }
+                },
                 backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
                 icon: Icons.done,
-                label: 'Booked',
+                label: 'Complete',
               ),
               SlidableAction(
-                onPressed: (value){},
+                onPressed: (value) {
+                  if (widget.d.status=='active') {
+                    eb.changeEventStatus(widget.d.eventId, 'cancelled').then((value) {
+                      if (value) {
+                        setState(() {
+                          status = 'cancelled';
+                        });
+                      }
+                    });
+                  }else{
+                    openToast(context, 'This event is not active');
+                  }
+                },
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
                 icon: Icons.delete,
@@ -231,7 +264,7 @@ class _ListItem extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              d.eventTitle,
+                              widget.d.eventTitle,
                               maxLines: 1,
                               style: const TextStyle(
                                   fontSize: 17, fontWeight: FontWeight.w600),
@@ -241,18 +274,22 @@ class _ListItem extends StatelessWidget {
                               padding: const EdgeInsets.all(3.0),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(6.0),
-                                color: d.status == 'pendingApproval'
+                                color: status == 'booked'
                                     ? Colors.orangeAccent
-                                    : d.status == 'active'
+                                    : status == 'active'
                                         ? Colors.green[500]
-                                        : Colors.red[400],
+                                        : status == 'completed'
+                                            ? Colors.blue[500]
+                                            : Colors.red[400],
                               ),
                               child: Text(
-                                d.status == 'pendingApproval'
-                                    ? 'Pending Approval'
-                                    : d.status == 'active'
+                                status == 'booked'
+                                    ? 'Booking Completed'
+                                    : status == 'active'
                                         ? 'Active'
-                                        : 'Rejected',
+                                        : status == 'completed'
+                                            ? 'Completed'
+                                            : 'Cancelled',
                                 style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
@@ -268,7 +305,7 @@ class _ListItem extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
-                              d.departCity,
+                              widget.d.departCity,
                               maxLines: 1,
                               style: TextStyle(
                                   fontSize: 13, color: Colors.grey[700]),
@@ -277,11 +314,11 @@ class _ListItem extends StatelessWidget {
                               width: 5,
                             ),
                             Icon(
-                              d.travelMode == 'Aeroplane'
+                              widget.d.travelMode == 'Aeroplane'
                                   ? FontAwesomeIcons.plane
-                                  : d.travelMode == 'Bus'
+                                  : widget.d.travelMode == 'Bus'
                                       ? FontAwesomeIcons.bus
-                                      : d.travelMode == 'Car'
+                                      : widget.d.travelMode == 'Car'
                                           ? FontAwesomeIcons.car
                                           : FontAwesomeIcons.train,
                               size: 16,
@@ -292,7 +329,7 @@ class _ListItem extends StatelessWidget {
                             ),
                             Expanded(
                               child: Text(
-                                d.destCity,
+                                widget.d.destCity,
                                 maxLines: 1,
                                 style: TextStyle(
                                     fontSize: 13, color: Colors.grey[700]),
@@ -300,7 +337,7 @@ class _ListItem extends StatelessWidget {
                             ),
                             Text(
                               DateFormat('d MMMM yyyy ')
-                                  .format(d.departDate.toDate()),
+                                  .format(widget.d.departDate.toDate()),
                               style: TextStyle(
                                   fontSize: 13, color: Colors.grey[700]),
                             ),
@@ -313,13 +350,13 @@ class _ListItem extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
-                              'Seats Booked: ${d.seatsBooked}',
+                              'Seats Booked: ${widget.d.seatsBooked}',
                               style: TextStyle(
                                   fontSize: 13, color: Colors.grey[700]),
                             ),
                             const Spacer(),
                             Text(
-                              'Total Capacity: ${d.capacity}',
+                              'Total Capacity: ${widget.d.capacity}',
                               style: TextStyle(
                                   fontSize: 13, color: Colors.grey[700]),
                             ),
@@ -332,13 +369,13 @@ class _ListItem extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
-                              'Duration: ${d.duration}',
+                              'Duration: ${widget.d.duration}',
                               style: TextStyle(
                                   fontSize: 13, color: Colors.grey[700]),
                             ),
                             const Spacer(),
                             Text(
-                              '${d.price} Pkr',
+                              '${widget.d.price} Pkr',
                               style: TextStyle(
                                   fontSize: 13, color: Colors.grey[700]),
                             ),
@@ -358,7 +395,7 @@ class _ListItem extends StatelessWidget {
                             const Spacer(),
                             Text(
                               DateFormat('d MMMM yyyy ')
-                                  .format(d.bookingDeadline.toDate()),
+                                  .format(widget.d.bookingDeadline.toDate()),
                               style: TextStyle(
                                   fontSize: 13, color: Colors.red[400]),
                             ),
@@ -367,7 +404,7 @@ class _ListItem extends StatelessWidget {
                         const SizedBox(
                           height: 10,
                         ),
-                        Text('Event Created By: ${d.createrName}')
+                        Text('Event Created By: ${widget.d.createrName}')
                       ],
                     ),
                   ),

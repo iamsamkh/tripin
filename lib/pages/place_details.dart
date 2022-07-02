@@ -94,11 +94,9 @@ class _PlaceDetailsState extends State<PlaceDetails> {
                       decoration: const BoxDecoration(
                         color: Colors.white,
                       ),
-                      child: CarouselSlider(options: CarouselOptions(), items: [
-                        CustomCacheImage(imageUrl: widget.data.imageUrl[0]),
-                        // NetworkImage(widget.data.imageUrl[0]);
-                        // Image.network(widget.data.imageUrl[0]),
-                      ]),
+                      child: CarouselSlider(options: CarouselOptions(), items: 
+                      widget.data.imageUrl.map((e) => CustomCacheImage(imageUrl: e)).toList()
+                      ),
                     ),
                   ),
                 ),
@@ -237,7 +235,7 @@ class _PlaceDetailsState extends State<PlaceDetails> {
                     height: 15,
                   ),
                   OtherPlaces(
-                    provinceName: widget.data.province,
+                    categoryId: widget.data.province,
                     placeId: widget.data.id,
                   ),
                   const SizedBox(

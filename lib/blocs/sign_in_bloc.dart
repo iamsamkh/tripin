@@ -44,6 +44,9 @@ class SignInBloc extends ChangeNotifier {
   String? _email;
   String? get email => _email;
 
+  String _userType = 'normal';
+  String get userType => _userType;
+
   String? _imageUrl;
   String? get imageUrl => _imageUrl;
 
@@ -73,6 +76,7 @@ class SignInBloc extends ChangeNotifier {
         .signIn()
         .catchError((error) => print('error : $error'));
     if (googleUser != null) {
+      print('in if');
       try {
         final GoogleSignInAuthentication googleAuth =
             await googleUser.authentication;
@@ -88,6 +92,7 @@ class SignInBloc extends ChangeNotifier {
         _name = userDetails!.displayName;
         _email = userDetails.email;
         _imageUrl = userDetails.photoURL;
+
         _uid = userDetails.uid;
         _signInProvider = 'google';
 
@@ -96,6 +101,7 @@ class SignInBloc extends ChangeNotifier {
       } catch (e) {
         _hasError = true;
         _errorCode = e.toString();
+        print(_errorCode);
         notifyListeners();
       }
     } else {
@@ -210,6 +216,7 @@ class SignInBloc extends ChangeNotifier {
     var userData = {
       'name': _name,
       'email': _email,
+      'userType': 'normal',
       'uid': _uid,
       'image url': _imageUrl,
       'joining date': _joiningDate,
@@ -233,6 +240,7 @@ class SignInBloc extends ChangeNotifier {
 
     await sp.setString('name', _name!);
     await sp.setString('email', _email!);
+    await sp.setString('userType', _userType);
     await sp.setString('image_url', _imageUrl!);
     await sp.setString('uid', _uid!);
     await sp.setString('joining_date', _joiningDate!);
@@ -243,6 +251,7 @@ class SignInBloc extends ChangeNotifier {
     final SharedPreferences sp = await SharedPreferences.getInstance();
     _name = sp.getString('name')!;
     _email = sp.getString('email')!;
+    _userType = sp.getString('userType')!;
     _imageUrl = sp.getString('image_url')!;
     _uid = sp.getString('uid')!;
     _joiningDate = sp.getString('joining_date')!;
@@ -261,7 +270,7 @@ class SignInBloc extends ChangeNotifier {
       _email = snap['email'];
       _imageUrl = snap['image url'];
       _joiningDate = snap['joining date'];
-      print(_name);
+      _userType = snap['userType'];
     });
     notifyListeners();
   }
@@ -279,6 +288,12 @@ class SignInBloc extends ChangeNotifier {
     notifyListeners();
   }
 
+  void checkUserType() async {
+    final SharedPreferences sp = await SharedPreferences.getInstance();
+    _userType = sp.getString('userType') ?? 'normal';
+    notifyListeners();
+  }
+
   Future userSignout() async {
     if (_signInProvider == 'apple') {
       await _firebaseAuth.signOut();
@@ -292,6 +307,7 @@ class SignInBloc extends ChangeNotifier {
     await clearAllData();
     _isSignedIn = false;
     _guestUser = false;
+    _userType = 'normal';
     notifyListeners();
   }
 

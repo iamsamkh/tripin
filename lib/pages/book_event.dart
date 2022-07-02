@@ -80,7 +80,7 @@ class _BookEventState extends State<BookEvent> {
       return false;
     } else {
       var _eventData = {
-        'bookingStatus': 'Pending Payment',
+        'bookingStatus': 'pending',
         'duration': widget.e.duration,
         'userId': sb.uid,
         'fullName': nameCtrl.text,
@@ -268,18 +268,22 @@ class _ListItem extends StatelessWidget {
                               padding: const EdgeInsets.all(3.0),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(6.0),
-                                color: eventData.status == 'pendingApproval'
+                                color: eventData.status == 'booked'
                                     ? Colors.orangeAccent
                                     : eventData.status == 'active'
                                         ? Colors.green[500]
-                                        : Colors.red[400],
+                                        : eventData.status == 'completed'
+                                            ? Colors.blue[500]
+                                            : Colors.red[400],
                               ),
                               child: Text(
-                                eventData.status == 'pendingApproval'
-                                    ? 'Pending Approval'
+                                eventData.status == 'booked'
+                                    ? 'Booking Completed'
                                     : eventData.status == 'active'
                                         ? 'Active'
-                                        : 'Rejected',
+                                        : eventData.status == 'completed'
+                                            ? 'Completed'
+                                            : 'Cancelled',
                                 style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,

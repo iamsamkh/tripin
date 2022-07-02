@@ -34,6 +34,7 @@ class _BookmarkPageState extends State<BookmarkPage>
       child: Scaffold(
         backgroundColor: Colors.grey[100],
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: const Text('Bookmarks').tr(),
           titleTextStyle: const TextStyle(
             fontWeight: FontWeight.w400,

@@ -67,41 +67,44 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        // backgroundColor: Colors.grey,
-        child: const Icon(
-          FontAwesomeIcons.plus,
+    return WillPopScope(
+      onWillPop: ()async => false,
+      child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          // backgroundColor: Colors.grey,
+          child: const Icon(
+            FontAwesomeIcons.plus,
+          ),
+          onPressed: () {
+            bool _guestUser = context.read<SignInBloc>().guestUser;
+            if (_guestUser == true) {
+              openSignInDialog(context);
+            } else {
+              bottomDialogScreen(context, const AddNewPlace());
+            }
+          },
         ),
-        onPressed: () {
-          bool _guestUser = context.read<SignInBloc>().guestUser;
-          if (_guestUser == true) {
-            openSignInDialog(context);
-          } else {
-            bottomDialogScreen(context, const AddNewPlace());
-          }
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: AnimatedBottomNavigationBar(
-        gapWidth: 10.w,
-        icons: iconList,
-        activeIndex: _currentIndex,
-        gapLocation: GapLocation.center,
-        inactiveColor: Colors.grey[600],
-        onTap: (index) => onTabTapped(index),
-      ),
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: const <Widget>[
-          Explore(),
-          // CategoriesPage(),
-          ViewEvents(),
-          // BlogPage(),
-          BookmarkPage(),
-          ProfilePage(),
-        ],
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        bottomNavigationBar: AnimatedBottomNavigationBar(
+          gapWidth: 10.w,
+          icons: iconList,
+          activeIndex: _currentIndex,
+          gapLocation: GapLocation.center,
+          inactiveColor: Colors.grey[600],
+          onTap: (index) => onTabTapped(index),
+        ),
+        body: PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
+          children: const <Widget>[
+            Explore(),
+            // CategoriesPage(),
+            ViewEvents(),
+            // BlogPage(),
+            BookmarkPage(),
+            ProfilePage(enableBack: false,),
+          ],
+        ),
       ),
     );
   }

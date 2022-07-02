@@ -17,19 +17,20 @@ import '../utils/convert_map_icon.dart';
 import '../utils/map_util.dart';
 import 'package:provider/provider.dart';
 
-class GuidePage extends StatefulWidget {
+class GuideNewPage extends StatefulWidget {
   final Place d;
-  const GuidePage({Key? key, required this.d}) : super(key: key);
+  const GuideNewPage({Key? key, required this.d}) : super(key: key);
 
   @override
-  _GuidePageState createState() => _GuidePageState();
+  _GuideNewPageState createState() => _GuideNewPageState();
 }
 
-class _GuidePageState extends State<GuidePage> {
-  late GoogleMapController mapController;
+class _GuideNewPageState extends State<GuideNewPage> {
+  // late GoogleMapController mapController;
+  Completer<GoogleMapController> mapController = Completer();
 
   final List<Marker> _markers = [];
-  Map data = {};
+  // Map data = {};
   String distance = 'O km';
 
   // Map<PolylineId, Polyline> polylines = {};
@@ -40,19 +41,19 @@ class _GuidePageState extends State<GuidePage> {
   late Uint8List _sourceIcon;
   late Uint8List _destinationIcon;
 
-  Future getData() async {
-    await FirebaseFirestore.instance
-        .collection('placesN')
-        .doc(widget.d.id)
-        .collection('travel guide')
-        .doc(widget.d.id)
-        .get()
-        .then((DocumentSnapshot snap) {
-      setState(() {
-        data = snap.data() as Map<dynamic, dynamic>;
-      });
-    });
-  }
+  // Future getData() async {
+  //   await FirebaseFirestore.instance
+  //       .collection('placesN')
+  //       .doc(widget.d.id)
+  //       .collection('travel guide')
+  //       .doc(widget.d.id)
+  //       .get()
+  //       .then((DocumentSnapshot snap) {
+  //     setState(() {
+  //       data = snap.data() as Map<dynamic, dynamic>;
+  //     });
+  //   });
+  // }
 
   _setMarkerIcons() async {
     _sourceIcon = await getBytesFromAsset(Config().drivingMarkerIcon, 110);
@@ -63,14 +64,17 @@ class _GuidePageState extends State<GuidePage> {
   Future addMarker() async {
     List m = [
       Marker(
-          markerId: MarkerId(data['startpoint name']),
-          position: LatLng(data['startpoint lat'], data['startpoint lng']),
-          infoWindow: InfoWindow(title: data['startpoint name']),
+          // markerId: MarkerId(data['startpoint name']),
+          markerId: const MarkerId('You'),
+          // position: LatLng(data['startpoint lat'], data['startpoint lng']),
+          position: const LatLng(33.7700491, 72.8245186),
+          // infoWindow: InfoWindow(title: data['startpoint name']),
+          infoWindow: InfoWindow(title: 'You'),
           icon: BitmapDescriptor.fromBytes(_sourceIcon)),
       Marker(
-          markerId: MarkerId(data['endpoint name']),
-          position: LatLng(data['endpoint lat'], data['endpoint lng']),
-          infoWindow: InfoWindow(title: data['endpoint name']),
+          markerId: MarkerId(widget.d.name),
+          position: LatLng(widget.d.latitude, widget.d.longitude),
+          infoWindow: InfoWindow(title: widget.d.name),
           icon: BitmapDescriptor.fromBytes(_destinationIcon))
     ];
     setState(() {
@@ -103,13 +107,13 @@ class _GuidePageState extends State<GuidePage> {
     }
     throw('error');
   }
-  Future<void> temp()async{
-    final directions = await getDirections(LatLng(data['startpoint lat'], data['startpoint lng']), LatLng(data['endpoint lat'], data['endpoint lng']));
-    print(directions.polylinePoints);
-    setState(() {
-      _info = directions;
-    });
-  }
+  // Future<void> temp()async{
+  //   final directions = await getDirections(LatLng(33.7700491, 72.8245186), LatLng(widget.d.latitude, widget.d.longitude));
+  //   print(directions.polylinePoints);
+  //   setState(() {
+  //     _info = directions;
+  //   });
+  // }
   // Future _getPolyline() async {
   //   PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
   //     Config().mapAPIKey,
@@ -136,32 +140,36 @@ class _GuidePageState extends State<GuidePage> {
   //   setState(() {});
   // }
 
-  void animateCamera() {
-    mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        target: LatLng(data['startpoint lat'], data['startpoint lng']),
+  Future<void> animateCamera() async{
+    final GoogleMapController controller = await mapController.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(const CameraPosition(
+        target: LatLng(33.7700491, 72.8245186),
         zoom: 8,
         bearing: 120)));
   }
 
-  void onMapCreated(controller) {
+  void onMapCreated(GoogleMapController controller) {
+    mapController.complete(controller);
     controller.setMapStyle(MapUtils.mapStyles);
-    setState(() {
-      mapController = controller;
-    });
+    // setState(() {
+    //   mapController = controller;
+    // });
   }
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 0)).then((value) async {
-      // context.read<AdsBloc>().initiateAds();
-    });
+    // Future.delayed(const Duration(milliseconds: 0)).then((value) async {
+    //   // context.read<AdsBloc>().initiateAds();
+    // });
     _setMarkerIcons();
-    getData().then((value) => addMarker().then((value) => temp().then((value) {
-          // _getPolyline();
-          // computeDistance();
-          animateCamera();
-        })));
+    // getData().then((value) => 
+    addMarker();
+    // .then((value) => temp().then((value) {
+    //       // _getPolyline();
+    //       // computeDistance();
+    //       // animateCamera();
+    //     }));
   }
 
   Widget panelUI() {
@@ -207,7 +215,9 @@ class _GuidePageState extends State<GuidePage> {
                       color: Colors.grey[800],
                       fontSize: 18,
                       fontWeight: FontWeight.bold),
-                  text: data['price'])
+                  text: 'Price'
+                  // text: data['price']
+                  )
             ])),
         RichText(
             text: TextSpan(
@@ -252,61 +262,63 @@ class _GuidePageState extends State<GuidePage> {
                 ),
               ],
             )),
-        Expanded(
-          child: data.isEmpty
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  itemCount: data['paths'].length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 15, right: 15),
-                      child: Row(
-                        children: <Widget>[
-                          Column(
-                            children: <Widget>[
-                              CircleAvatar(
-                                  radius: 15,
-                                  child: Text(
-                                    '${index + 1}',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  backgroundColor:
-                                      ColorList().guideColors[index]),
-                              Container(
-                                height: 90,
-                                width: 2,
-                                color: Colors.black12,
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          SizedBox(
-                            child: Expanded(
-                              child: Text(
-                                data['paths'][index],
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  },
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const SizedBox();
-                  },
-                ),
-        ),
+        // Expanded(
+        //   child:
+        //   //  data.isEmpty
+        //   //     ? const Center(
+        //   //         child: CircularProgressIndicator(),
+        //   //       )
+        //   //     : 
+        //       ListView.separated(
+        //           padding: const EdgeInsets.only(bottom: 10),
+        //           itemCount: data['paths'].length,
+        //           itemBuilder: (BuildContext context, int index) {
+        //             return Padding(
+        //               padding: const EdgeInsets.only(left: 15, right: 15),
+        //               child: Row(
+        //                 children: <Widget>[
+        //                   Column(
+        //                     children: <Widget>[
+        //                       CircleAvatar(
+        //                           radius: 15,
+        //                           child: Text(
+        //                             '${index + 1}',
+        //                             style: const TextStyle(color: Colors.white),
+        //                           ),
+        //                           backgroundColor:
+        //                               ColorList().guideColors[index]),
+        //                       Container(
+        //                         height: 90,
+        //                         width: 2,
+        //                         color: Colors.black12,
+        //                       )
+        //                     ],
+        //                   ),
+        //                   const SizedBox(
+        //                     width: 15,
+        //                   ),
+        //                   SizedBox(
+        //                     child: Expanded(
+        //                       child: Text(
+        //                         data['paths'][index],
+        //                         maxLines: 3,
+        //                         overflow: TextOverflow.ellipsis,
+        //                         style: const TextStyle(
+        //                           fontSize: 16,
+        //                           fontWeight: FontWeight.w500,
+        //                         ),
+        //                       ),
+        //                     ),
+        //                   )
+        //                 ],
+        //               ),
+        //             );
+        //           },
+        //           separatorBuilder: (BuildContext context, int index) {
+        //             return const SizedBox();
+        //           },
+        //         ),
+        // ),
       ],
     );
   }
@@ -389,9 +401,10 @@ class _GuidePageState extends State<GuidePage> {
                 const SizedBox(
                   width: 5,
                 ),
-                data.isEmpty
-                    ? Container()
-                    : Container(
+                // data.isEmpty
+                //     ? Container()
+                //     : 
+                    Container(
                         width: MediaQuery.of(context).size.width * 0.80,
                         decoration: BoxDecoration(
                             color: Colors.white,
@@ -401,7 +414,8 @@ class _GuidePageState extends State<GuidePage> {
                           padding: const EdgeInsets.only(
                               left: 15, top: 10, bottom: 10, right: 15),
                           child: Text(
-                            '${data['startpoint name']} - ${data['endpoint name']}',
+                            // '${data['startpoint name']} - ${data['endpoint name']}',
+                            'Your Location - ${widget.d.name}',
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w600),
                           ),
@@ -411,13 +425,13 @@ class _GuidePageState extends State<GuidePage> {
             ),
           ),
         ),
-        data.isEmpty 
-        // && polylines.isEmpty
-            ? const Align(
-                alignment: Alignment.center,
-                child: CircularProgressIndicator(),
-              )
-            : Container()
+        // data.isEmpty 
+        // // && polylines.isEmpty
+        //     ? const Align(
+        //         alignment: Alignment.center,
+        //         child: CircularProgressIndicator(),
+        //       )
+        //     : Container()
       ]),
     ));
   }

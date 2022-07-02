@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:tripin/pages/blogs.dart';
 import 'package:tripin/pages/categories.dart';
+import 'package:tripin/pages/manage_bookings.dart';
 import 'package:tripin/pages/manage_events.dart';
 import 'package:tripin/pages/manage_places.dart';
 import 'package:tripin/pages/view_booking.dart';
@@ -19,7 +20,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  final bool enableBack;
+  const ProfilePage({Key? key, required this.enableBack}) : super(key: key);
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -50,6 +52,7 @@ class _ProfilePageState extends State<ProfilePage>
     final sb = context.watch<SignInBloc>();
     return Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: widget.enableBack ? true : false,
           title: const Text('Profile').tr(),
           titleTextStyle: const TextStyle(
             fontWeight: FontWeight.w400,
@@ -70,6 +73,8 @@ class _ProfilePageState extends State<ProfilePage>
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 50),
           children: [
             sb.isSignedIn == false ? const GuestUserUI() : const UserUI(),
+            if(sb.isSignedIn == true && sb.userType == 'manager')
+            const ManagerUI(),
             const Text(
               "General Setting",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
@@ -78,12 +83,33 @@ class _ProfilePageState extends State<ProfilePage>
               height: 15,
             ),
             ListTile(
+                title: const Text('Blogs').tr(),
+                leading: Container(
+                  height: 30,
+                  width: 30,
+                  decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(5)),
+                  child: const Icon(FontAwesomeIcons.newspaper,
+                      size: 20, color: Colors.white),
+                ),
+                trailing: const Icon(
+                  FontAwesomeIcons.chevronRight,
+                  size: 20,
+                ),
+                onTap: () async {
+                  nextScreen(context, const BlogPage());
+                }),
+            const Divider(
+              height: 5,
+            ),
+            ListTile(
                 title: const Text('View Categories').tr(),
                 leading: Container(
                   height: 30,
                   width: 30,
                   decoration: BoxDecoration(
-                      color: Colors.green,
+                      color: Colors.teal,
                       borderRadius: BorderRadius.circular(5)),
                   child: const Icon(FontAwesomeIcons.borderAll,
                       size: 20, color: Colors.white),
@@ -162,47 +188,6 @@ class _ProfilePageState extends State<ProfilePage>
                 size: 20,
               ),
               onTap: () => nextScreenPopup(context, const LanguagePopup()),
-            ),
-            const Divider(
-              height: 5,
-            ),
-            ListTile(
-              title: const Text('Rate this app').tr(),
-              leading: Container(
-                height: 30,
-                width: 30,
-                decoration: BoxDecoration(
-                    color: Colors.orangeAccent,
-                    borderRadius: BorderRadius.circular(5)),
-                child: const Icon(FontAwesomeIcons.star,
-                    size: 20, color: Colors.white),
-              ),
-              trailing: const Icon(
-                FontAwesomeIcons.chevronRight,
-                size: 20,
-              ),
-              // onTap: () async => LaunchReview.launch(
-              //     androidAppId: sb.packageName, iOSAppId: Config().iOSAppId),
-            ),
-            const Divider(
-              height: 5,
-            ),
-            ListTile(
-              title: const Text('Licence').tr(),
-              leading: Container(
-                height: 30,
-                width: 30,
-                decoration: BoxDecoration(
-                    color: Colors.purpleAccent,
-                    borderRadius: BorderRadius.circular(5)),
-                child: const Icon(FontAwesomeIcons.paperclip,
-                    size: 20, color: Colors.white),
-              ),
-              trailing: const Icon(
-                FontAwesomeIcons.chevronRight,
-                size: 20,
-              ),
-              onTap: () => openAboutDialog(),
             ),
             const Divider(
               height: 5,
@@ -296,6 +281,63 @@ class GuestUserUI extends StatelessWidget {
   }
 }
 
+class ManagerUI extends StatelessWidget{
+  const ManagerUI({Key? key}) : super(key: key);
+  
+  @override
+  Widget build(BuildContext context){
+    return Column(children: [
+      Row(
+          children: [
+            const Text(
+              "Manager Setting",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ).tr(),
+            const Spacer(),
+          ],
+        ),
+        const SizedBox(
+          height: 15,
+        ),
+        ListTile(
+            title: const Text('Manage Event'),
+            leading: Container(
+              height: 30.h,
+              width: 30.w,
+              decoration: BoxDecoration(
+                  color: Colors.cyan, borderRadius: BorderRadius.circular(5)),
+              child: const Icon(FontAwesomeIcons.star ,
+                  size: 20, color: Colors.white),
+            ),
+            trailing: const Icon(
+              FontAwesomeIcons.chevronRight,
+              size: 20,
+            ),
+            onTap: () => nextScreen(context, const ManageEvents())),
+        Divider(
+          height: 5.h,
+        ),
+        ListTile(
+            title: const Text('Manage Bookings'),
+            leading: Container(
+              height: 30.h,
+              width: 30.w,
+              decoration: BoxDecoration(
+                  color: Colors.yellow[700], borderRadius: BorderRadius.circular(5)),
+              child: const Icon(FontAwesomeIcons.ticket,
+                  size: 20, color: Colors.white),
+            ),
+            trailing: const Icon(
+              FontAwesomeIcons.chevronRight,
+              size: 20,
+            ),
+            onTap: () => nextScreen(context, const ManageBooking())),
+        const SizedBox(
+          height: 15,
+        ),
+    ],);
+  }
+}
 class UserUI extends StatelessWidget {
   const UserUI({Key? key}) : super(key: key);
 
@@ -339,30 +381,13 @@ class UserUI extends StatelessWidget {
           height: 5,
         ),
         ListTile(
-          title: Text(sb.joiningDate!),
-          leading: Container(
-            height: 30.h,
-            width: 30.w,
-            decoration: BoxDecoration(
-                color: Colors.orange, borderRadius: BorderRadius.circular(5)),
-            child: const Icon(
-                // FlutterIcons.dashboard_ant,
-                FontAwesomeIcons.gauge,
-                size: 20,
-                color: Colors.white),
-          ),
-        ),
-        const Divider(
-          height: 5,
-        ),
-        ListTile(
             title: const Text('View Bookings'),
             leading: Container(
               height: 30.h,
               width: 30.w,
               decoration: BoxDecoration(
-                  color: Colors.green, borderRadius: BorderRadius.circular(5)),
-              child: const Icon(FontAwesomeIcons.landmark,
+                  color: Colors.yellow[700], borderRadius: BorderRadius.circular(5)),
+              child: const Icon(FontAwesomeIcons.ticket,
                   size: 20, color: Colors.white),
             ),
             trailing: const Icon(
@@ -412,7 +437,7 @@ class UserUI extends StatelessWidget {
           height: 5,
         ),
         ListTile(
-          title: const Text('Logout').tr(),
+          title: const Text('logout').tr(),
           leading: Container(
             height: 30.h,
             width: 30.w,
@@ -431,54 +456,6 @@ class UserUI extends StatelessWidget {
         const SizedBox(
           height: 15,
         ),
-        Row(
-          children: [
-            const Text(
-              "Manager Setting",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-            ).tr(),
-            const Spacer(),
-          ],
-        ),
-        const SizedBox(
-          height: 15,
-        ),
-        ListTile(
-            title: const Text('Manage Event'),
-            leading: Container(
-              height: 30.h,
-              width: 30.w,
-              decoration: BoxDecoration(
-                  color: Colors.green, borderRadius: BorderRadius.circular(5)),
-              child: const Icon(FontAwesomeIcons.landmark,
-                  size: 20, color: Colors.white),
-            ),
-            trailing: const Icon(
-              FontAwesomeIcons.chevronRight,
-              size: 20,
-            ),
-            onTap: () => nextScreen(context, const ManageEvents())),
-        Divider(
-          height: 5.h,
-        ),
-        ListTile(
-            title: const Text('Manage Bookings'),
-            leading: Container(
-              height: 30.h,
-              width: 30.w,
-              decoration: BoxDecoration(
-                  color: Colors.green, borderRadius: BorderRadius.circular(5)),
-              child: const Icon(FontAwesomeIcons.landmark,
-                  size: 20, color: Colors.white),
-            ),
-            trailing: const Icon(
-              FontAwesomeIcons.chevronRight,
-              size: 20,
-            ),
-            onTap: () => nextScreen(context, const ManageEvents())),
-        const SizedBox(
-          height: 15,
-        ),
       ],
     );
   }
@@ -488,7 +465,7 @@ class UserUI extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Logout Title').tr(),
+            title: const Text('logout title').tr(),
             actions: [
               TextButton(
                 child: const Text('No').tr(),

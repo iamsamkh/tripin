@@ -10,9 +10,9 @@ import 'custom_cache_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class OtherPlaces extends StatefulWidget {
-  final String provinceName;
+  final String categoryId;
   final String placeId;
-  OtherPlaces({Key? key, required this.provinceName, required this.placeId})
+  const OtherPlaces({Key? key, required this.categoryId, required this.placeId})
       : super(key: key);
 
   @override
@@ -25,7 +25,7 @@ class _OtherPlacesState extends State<OtherPlaces> {
     super.initState();
     context
         .read<OtherPlacesBloc>()
-        .getData(widget.provinceName, widget.placeId);
+        .getData(widget.categoryId, widget.placeId);
   }
 
   @override
@@ -56,7 +56,7 @@ class _OtherPlacesState extends State<OtherPlaces> {
               color: Theme.of(context).primaryColor,
               borderRadius: BorderRadius.circular(40)),
         ),
-        Container(
+        SizedBox(
           height: 220,
           //color: Colors.green,
           width: MediaQuery.of(context).size.width,
@@ -70,7 +70,6 @@ class _OtherPlacesState extends State<OtherPlaces> {
               return ItemList(
                 d: ob.data[index],
               );
-              //return LoadingCard1();
             },
           ),
         )

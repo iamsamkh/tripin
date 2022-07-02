@@ -56,7 +56,6 @@ class _ManagePlacesState extends State<ManagePlaces>
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        automaticallyImplyLeading: false,
         title: const Text('Manage Your Places').tr(),
         titleTextStyle: const TextStyle(
           fontWeight: FontWeight.w400,
@@ -69,6 +68,11 @@ class _ManagePlacesState extends State<ManagePlaces>
               child: const Icon(Icons.filter_list_outlined),
               itemBuilder: (BuildContext context) {
                 return <PopupMenuItem>[
+                  if(_filterBy != '')
+                  const PopupMenuItem(
+                    child: Text('Remove Filter'),
+                    value: '',
+                  ),
                   const PopupMenuItem(
                     child: Text('Pending Approval'),
                     value: 'pendingApproval',

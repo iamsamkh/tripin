@@ -30,7 +30,7 @@ class _CategoriesBasedPlacesState extends State<CategoriesBasedPlaces> {
   ScrollController controller = ScrollController();
   DocumentSnapshot? _lastVisible;
   bool? _isLoading;
-  List<DocumentSnapshot> _snap = [];
+  final List<DocumentSnapshot> _snap = [];
   List<Place> _data = [];
   bool? _hasData;
 
@@ -52,7 +52,7 @@ class _CategoriesBasedPlacesState extends State<CategoriesBasedPlaces> {
     _getData();
   }
 
-  Future<Null> _getData() async {
+  Future<void> _getData() async {
     setState(() => _hasData = true);
     QuerySnapshot data;
     if (_lastVisible == null) {
@@ -96,7 +96,6 @@ class _CategoriesBasedPlacesState extends State<CategoriesBasedPlaces> {
         });
       }
     }
-    return null;
   }
 
   @override

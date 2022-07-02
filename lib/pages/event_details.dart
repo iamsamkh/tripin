@@ -1,10 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:line_icons/line_icons.dart';
-import 'package:tripin/models/event.dart';
-import '../blocs/sign_in_bloc.dart';
-import 'package:provider/provider.dart';
+import '../models/event.dart';
 
 class EventDetails extends StatefulWidget {
   final Event data;

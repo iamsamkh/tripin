@@ -28,7 +28,6 @@ import 'package:provider/provider.dart';
       stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
       builder: (context, snap) {
         final data = snap.data;
-        // if (uid == null) return LoveIcon().normal;
         if (!snap.hasData) return LoveIcon().normal;
         List d = data![_type];
 

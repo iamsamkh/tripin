@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tripin/models/booking.dart';
-import '../models/event.dart';
+import 'package:provider/provider.dart';
 
 class ViewBookingBloc extends ChangeNotifier {
   DocumentSnapshot? _lastVisible;
@@ -22,6 +22,7 @@ class ViewBookingBloc extends ChangeNotifier {
   List<DocumentSnapshot> _snap = [];
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final user = FirebaseAuth.instance.currentUser;
+  
 
   bool _hasData = false;
   bool get hasData => _hasData;
@@ -31,6 +32,7 @@ class ViewBookingBloc extends ChangeNotifier {
     QuerySnapshot rawData;
 
     if (_lastVisible == null) {
+      print(user!.uid);
       rawData = filterBy == ''
           ? await firestore
               .collection('eventBookings')

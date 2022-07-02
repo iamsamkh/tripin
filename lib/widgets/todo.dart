@@ -3,6 +3,7 @@ import 'package:line_icons/line_icons.dart';
 import '../models/place.dart';
 import '../pages/experiences.dart';
 import '../pages/guide.dart';
+import '../pages/guideNew.dart';
 import '../pages/hotel.dart';
 import '../pages/restaurant.dart';
 import '../utils/next_screen.dart';
@@ -79,7 +80,7 @@ class TodoWidget extends StatelessWidget {
                                 fontSize: 15),
                           ).tr(),
                         ])),
-                onTap: () => nextScreen(context, GuidePage(d: placeData)),
+                onTap: () => nextScreen(context, GuideNewPage(d: placeData)),
               ),
               InkWell(
                 child: Container(

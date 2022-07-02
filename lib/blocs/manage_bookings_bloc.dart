@@ -3,18 +3,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../models/event.dart';
+import 'package:tripin/models/booking.dart';
 
-
-class ManageEventBloc extends ChangeNotifier {
+class ManageBookingsBloc extends ChangeNotifier {
   DocumentSnapshot? _lastVisible;
   DocumentSnapshot? get lastVisible => _lastVisible;
 
   bool _isLoading = true;
   bool get isLoading => _isLoading;
 
-  List<Event> _data = [];
-  List<Event> get data => _data;
+  List<Booking> _data = [];
+  List<Booking> get data => _data;
 
   String _popSelection = '';
   String get popupSelection => _popSelection;
@@ -22,7 +21,6 @@ class ManageEventBloc extends ChangeNotifier {
   List<DocumentSnapshot> _snap = [];
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final user = FirebaseAuth.instance.currentUser;
-
 
   bool _hasData = false;
   bool get hasData => _hasData;
@@ -33,24 +31,32 @@ class ManageEventBloc extends ChangeNotifier {
 
     if (_lastVisible == null) {
       rawData = filterBy == ''
-          ? await firestore.collection('events').where('createrId', isEqualTo: user!.uid)
-              .orderBy('deptDate').limit(5).get()
-          : await firestore
-              .collection('events')
-              .where('status', isEqualTo: filterBy)
+          ? await firestore
+              .collection('eventBookings')
               .where('createrId', isEqualTo: user!.uid)
-              .orderBy('deptDate')
+              .orderBy('bookingDate', descending: true)
+              .limit(5)
+              .get()
+          : await firestore
+              .collection('eventBookings')
+              .where('createrId', isEqualTo: user!.uid)
+              .where('bookingStatus', isEqualTo: filterBy)
+              .orderBy('bookingDate', descending: true)
               .limit(5)
               .get();
     } else {
       rawData = filterBy == ''
-          ? await firestore.collection('events').where('createrId', isEqualTo: user!.uid)
-              .orderBy('deptDate').limit(5).get()
-          : await firestore
-              .collection('events')
-              .where('status', isEqualTo: filterBy)
+          ? await firestore
+              .collection('eventBookings')
               .where('createrId', isEqualTo: user!.uid)
-              .orderBy('deptDate')
+              .orderBy('bookingDate', descending: true)
+              .limit(5)
+              .get()
+          : await firestore
+              .collection('eventBookings')
+              .where('createrId', isEqualTo: user!.uid)
+              .where('bookingStatus', isEqualTo: filterBy)
+              .orderBy('bookingDate', descending: true)
               .startAfter([_lastVisible![filterBy]])
               .limit(5)
               .get();
@@ -60,10 +66,9 @@ class ManageEventBloc extends ChangeNotifier {
       if (mounted) {
         _isLoading = false;
         _snap.clear();
-        
+
         _snap.addAll(rawData.docs);
-        print(_snap);
-        _data = _snap.map((e) => Event.fromFirestore(e)).toList();
+        _data = _snap.map((e) => Booking.fromFirestore(e)).toList();
       }
     } else {
       if (_lastVisible == null) {
@@ -98,9 +103,9 @@ class ManageEventBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> changeEventStatus(String eventId, String status) async{
+  Future<bool> changeBookingStatus(String bookingId, String status) async{
     try{
-      await firestore.collection('events').doc(eventId).update({'status': status});
+      await firestore.collection('events').doc(bookingId).update({'status': status});
       return true;
     }catch(_){
       return false;

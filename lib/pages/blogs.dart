@@ -61,7 +61,7 @@ class _BlogPageState extends State<BlogPage>
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
         title: const Text('Blogs').tr(),
         titleTextStyle: const TextStyle(
             fontWeight: FontWeight.w400,

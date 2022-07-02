@@ -10,11 +10,13 @@ import '../utils/next_screen.dart';
 import '../utils/snacbar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../widgets/language.dart';
+import 'home.dart';
 
 class SignInPage extends StatefulWidget {
   final String? tag;
   const SignInPage({Key? key, this.tag}) : super(key: key);
 
+  @override
   _SignInPageState createState() => _SignInPageState();
 }
 
@@ -22,6 +24,7 @@ class _SignInPageState extends State<SignInPage> {
   bool googleSignInStarted = false;
   bool facebookSignInStarted = false;
   bool appleSignInStarted = false;
+  bool newUser = false;
 
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -62,6 +65,7 @@ class _SignInPageState extends State<SignInPage> {
                       .guestSignout()
                       .then((value) => sb.setSignIn().then((value) {
                             setState(() => googleSignInStarted = false);
+                            newUser = true;
                             afterSignIn();
                           })))));
             }
@@ -161,7 +165,11 @@ class _SignInPageState extends State<SignInPage> {
 
   afterSignIn() {
     if (widget.tag == null) {
-      nextScreen(context, DonePage());
+      if(newUser){
+        nextScreen(context, const DonePage());
+      }
+      nextScreenReplace(context, const HomePage());
+      
     } else {
       Navigator.pop(context);
     }
@@ -211,7 +219,7 @@ class _SignInPageState extends State<SignInPage> {
                         fontWeight: FontWeight.w400,
                         color: Colors.grey[700]),
                   ).tr(),
-                  SizedBox(
+                  const SizedBox(
                     height: 5,
                   ),
                   Text(
@@ -239,7 +247,7 @@ class _SignInPageState extends State<SignInPage> {
                           color: Colors.grey[700]),
                     ).tr(),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Container(
                     height: 3,
                     width: MediaQuery.of(context).size.width * 0.50,
@@ -254,7 +262,7 @@ class _SignInPageState extends State<SignInPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Container(
+                  SizedBox(
                     height: 45,
                     width: MediaQuery.of(context).size.width * 0.80,
                     child: FlatButton(
@@ -266,7 +274,7 @@ class _SignInPageState extends State<SignInPage> {
                             ? Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
+                                children: const [
                                   Icon(
                                     FontAwesomeIcons.google,
                                     color: Colors.white,
@@ -283,15 +291,15 @@ class _SignInPageState extends State<SignInPage> {
                                   )
                                 ],
                               )
-                            : Center(
+                            : const Center(
                                 child: CircularProgressIndicator(
                                     backgroundColor: Colors.white),
                               )),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 15,
                   ),
-                  Container(
+                  SizedBox(
                     height: 45,
                     width: MediaQuery.of(context).size.width * 0.80,
                     child: FlatButton(
@@ -305,7 +313,7 @@ class _SignInPageState extends State<SignInPage> {
                             ? Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
+                                children: const [
                                   Icon(
                                     FontAwesomeIcons.facebook,
                                     color: Colors.white,
@@ -322,17 +330,17 @@ class _SignInPageState extends State<SignInPage> {
                                   )
                                 ],
                               )
-                            : Center(
+                            : const Center(
                                 child: CircularProgressIndicator(
                                     backgroundColor: Colors.white),
                               )),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 15,
                   ),
                   Platform.isAndroid
                       ? Container()
-                      : Container(
+                      : SizedBox(
                           height: 45,
                           width: MediaQuery.of(context).size.width * 0.80,
                           child: FlatButton(
@@ -348,7 +356,7 @@ class _SignInPageState extends State<SignInPage> {
                                           CrossAxisAlignment.center,
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
-                                      children: [
+                                      children: const [
                                         Icon(
                                           FontAwesomeIcons.apple,
                                           color: Colors.white,
@@ -365,7 +373,7 @@ class _SignInPageState extends State<SignInPage> {
                                         )
                                       ],
                                     )
-                                  : Center(
+                                  : const Center(
                                       child: CircularProgressIndicator(
                                           backgroundColor: Colors.white),
                                     )),
