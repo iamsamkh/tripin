@@ -9,6 +9,7 @@ import 'package:tripin/pages/manage_bookings.dart';
 import 'package:tripin/pages/manage_events.dart';
 import 'package:tripin/pages/manage_places.dart';
 import 'package:tripin/pages/view_booking.dart';
+import '../blocs/notification_bloc.dart';
 import '../blocs/sign_in_bloc.dart';
 import '../config/config.dart';
 import '../pages/edit_profile.dart';
@@ -140,10 +141,10 @@ class _ProfilePageState extends State<ProfilePage>
               ),
               trailing: Switch(
                   activeColor: Theme.of(context).primaryColor,
-                  // value: context.watch<NotificationBloc>().subscribed,
-                  value: false,
+                  value: context.watch<NotificationBloc>().subscribed,
+                  // value: false,
                   onChanged: (val) {
-                    // context.read<NotificationBloc>().fcmSubscribe(bool);
+                    context.read<NotificationBloc>().fcmSubscribe(val);
                   }),
             ),
             const Divider(

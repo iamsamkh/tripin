@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:toast/toast.dart';
 import 'package:tripin/blocs/manage_places_bloc.dart';
 import '../models/Place.dart';
 import '../utils/empty.dart';
@@ -171,6 +172,7 @@ class _ListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+        ToastContext().init(context); //
     return InkWell(
       child: Container(
         margin: const EdgeInsets.only(top: 5, bottom: 10),

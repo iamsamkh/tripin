@@ -3,10 +3,8 @@ import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:location/location.dart';
+import 'package:location/location.dart';
 import 'package:tripin/utils/location_services.dart';
 import '../config/config.dart';
 import '../models/place.dart';
@@ -37,12 +35,11 @@ class GuidePageState extends State<GuidePage> {
     super.initState();
     _setMarkerIcons().then((_) => determinePosition().then((value) {
           if (value != null) {
-            placemarkFromCoordinates(value.latitude, value.longitude).then((placemart) =>  LocationService()
+            LocationService()
                 .getDirections(
                     // '${value.latitude},${value.longitude}',
-                    placemart[0].name!,
+                    'Uet Taxila',
                     widget.place.name
-                    // '${widget.place.latitude},${widget.place.longitude}'
                     )
                 .then((direction) {
               _setMarker(
@@ -67,7 +64,7 @@ class GuidePageState extends State<GuidePage> {
               });
             }).catchError((_) {
               print('error');
-            }));
+            });
             
           }
         }));
@@ -114,65 +111,31 @@ class GuidePageState extends State<GuidePage> {
   }
 
   Future<dynamic> determinePosition() async {
-    Future<Position> _determinePosition() async {
-  bool serviceEnabled;
-  LocationPermission permission;
+    print('in determine');
+    Location location = Location();
 
-  // Test if location services are enabled.
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    // Location services are not enabled don't continue
-    // accessing the position and request users of the 
-    // App to enable the location services.
-    return Future.error('Location services are disabled.');
-  }
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+    LocationData _locationData;
 
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      // Permissions are denied, next time you could try
-      // requesting permissions again (this is also where
-      // Android's shouldShowRequestPermissionRationale 
-      // returned true. According to Android guidelines
-      // your App should show an explanatory UI now.
-      return Future.error('Location permissions are denied');
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return null;
+      }
     }
-  }
-  
-  if (permission == LocationPermission.deniedForever) {
-    // Permissions are denied forever, handle appropriately. 
-    return Future.error(
-      'Location permissions are permanently denied, we cannot request permissions.');
-  } 
 
-  // When we reach here, permissions are granted and we can
-  // continue accessing the position of the device.
-  return await Geolocator.getCurrentPosition();
-}
-    // Location location = Location();
-
-    // bool _serviceEnabled;
-    // PermissionStatus _permissionGranted;
-    // LocationData _locationData;
-
-    // _serviceEnabled = await location.serviceEnabled();
-    // if (!_serviceEnabled) {
-    //   _serviceEnabled = await location.requestService();
-    //   if (!_serviceEnabled) {
-    //     return null;
-    //   }
-    // }
-
-    // _permissionGranted = await location.hasPermission();
-    // if (_permissionGranted == PermissionStatus.denied) {
-    //   _permissionGranted = await location.requestPermission();
-    //   if (_permissionGranted != PermissionStatus.granted) {
-    //     return null;
-    //   }
-    // }
-    // _locationData = await location.getLocation();
-    // return _locationData;
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return null;
+      }
+    }
+    _locationData = await location.getLocation();
+    print(_locationData.latitude);
+    return _locationData;
   }
 
   Widget panelBodyUI(h, w) {

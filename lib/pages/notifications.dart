@@ -28,11 +28,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   void initState() {
-    // controller.addListener(_scrollListener);
+    controller.addListener(_scrollListener);
     super.initState();
-    // Future.delayed(Duration(milliseconds: 0)).then((value) {
-    //   context.read<NotificationBloc>().onRefresh(mounted);
-    // });
+    Future.delayed(Duration(milliseconds: 0)).then((value) {
+      context.read<NotificationBloc>().onRefresh(mounted);
+    });
   }
 
 
@@ -41,23 +41,23 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   void dispose() {
-    // controller.removeListener(_scrollListener);
+    controller.removeListener(_scrollListener);
     super.dispose();
   }
 
 
 
 
-  // void _scrollListener() {
-  //   final db = context.read<NotificationBloc>();
+  void _scrollListener() {
+    final db = context.read<NotificationBloc>();
 
-  //   if (!db.isLoading) {
-  //     if (controller.position.pixels == controller.position.maxScrollExtent) {
-  //       context.read<NotificationBloc>().setLoading(true);
-  //       context.read<NotificationBloc>().getData(mounted);
-  //     }
-  //   }
-  // }
+    if (!db.isLoading) {
+      if (controller.position.pixels == controller.position.maxScrollExtent) {
+        context.read<NotificationBloc>().setLoading(true);
+        context.read<NotificationBloc>().getData(mounted);
+      }
+    }
+  }
 
 
 
@@ -65,7 +65,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    // final nb = context.watch<NotificationBloc>();
+    final nb = context.watch<NotificationBloc>();
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
@@ -80,37 +80,37 @@ class _NotificationsPageState extends State<NotificationsPage> {
           )
         ],
       ),
-      body: const Center(child: Text('To be implemented')),);
-    //   body: RefreshIndicator(
-    //     child: ListView.separated(
-    //       padding: EdgeInsets.only(top: 15, bottom: 20),
-    //       controller: controller,
-    //       physics: AlwaysScrollableScrollPhysics(),
-    //       shrinkWrap: true,
-    //       itemCount: nb.data.length + 1,
-    //       separatorBuilder: (context, index) => SizedBox(
-    //         height: 10,
-    //       ),
-    //       itemBuilder: (_, int index) {
-    //         if (index < nb.data.length) {
-    //           return _ListItem(d: nb.data[index]);
-    //         }
-    //         return Center(
-    //           child: new Opacity(
-    //             opacity: nb.isLoading ? 1.0 : 0.0,
-    //             child: new SizedBox(
-    //                 width: 32.0,
-    //                 height: 32.0,
-    //                 child: new CircularProgressIndicator()),
-    //           ),
-    //         );
-    //       },
-    //     ),
-    //     onRefresh: () async {
-    //       // context.read<NotificationBloc>().onRefresh(mounted);
-    //     },
-    //   ),
-    // );
+      // body: const Center(child: Text('To be implemented')),);
+      body: RefreshIndicator(
+        child: ListView.separated(
+          padding: EdgeInsets.only(top: 15, bottom: 20),
+          controller: controller,
+          physics: AlwaysScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: nb.data.length + 1,
+          separatorBuilder: (context, index) => SizedBox(
+            height: 10,
+          ),
+          itemBuilder: (_, int index) {
+            if (index < nb.data.length) {
+              return _ListItem(d: nb.data[index]);
+            }
+            return Center(
+              child: Opacity(
+                opacity: nb.isLoading ? 1.0 : 0.0,
+                child: const SizedBox(
+                    width: 32.0,
+                    height: 32.0,
+                    child: CircularProgressIndicator()),
+              ),
+            );
+          },
+        ),
+        onRefresh: () async {
+          context.read<NotificationBloc>().onRefresh(mounted);
+        },
+      ),
+    );
   }
 }
 

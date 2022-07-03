@@ -40,7 +40,8 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      child: MultiProvider(
+      builder: (context, child) {
+        return MultiProvider(
         providers: [
           ChangeNotifierProvider<BlogBloc>(
             create: (context) => BlogBloc(),
@@ -126,7 +127,9 @@ class _MyAppState extends State<MyApp> {
                 )),
             debugShowCheckedModeBanner: false,
             home: const SplashPage()),
-      ),
+      );
+      },
+      
     );
   }
 }

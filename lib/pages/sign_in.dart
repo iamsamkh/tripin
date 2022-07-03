@@ -265,13 +265,13 @@ class _SignInPageState extends State<SignInPage> {
                   SizedBox(
                     height: 45,
                     width: MediaQuery.of(context).size.width * 0.80,
-                    child: FlatButton(
+                    child: googleSignInStarted == false
+                            ? FlatButton(
                         onPressed: () => handleGoogleSignIn(),
                         color: Colors.blueAccent,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5)),
-                        child: googleSignInStarted == false
-                            ? Row(
+                        child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: const [
@@ -291,93 +291,93 @@ class _SignInPageState extends State<SignInPage> {
                                   )
                                 ],
                               )
-                            : const Center(
+                            ) : const Center(
                                 child: CircularProgressIndicator(
                                     backgroundColor: Colors.white),
-                              )),
+                              ),
                   ),
                   const SizedBox(
                     height: 15,
                   ),
-                  SizedBox(
-                    height: 45,
-                    width: MediaQuery.of(context).size.width * 0.80,
-                    child: FlatButton(
-                        onPressed: () {
-                          // handleFacebookSignIn();
-                        },
-                        color: Colors.indigo,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5)),
-                        child: facebookSignInStarted == false
-                            ? Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Icon(
-                                    FontAwesomeIcons.facebook,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    'Sign In with Facebook',
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white),
-                                  )
-                                ],
-                              )
-                            : const Center(
-                                child: CircularProgressIndicator(
-                                    backgroundColor: Colors.white),
-                              )),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Platform.isAndroid
-                      ? Container()
-                      : SizedBox(
-                          height: 45,
-                          width: MediaQuery.of(context).size.width * 0.80,
-                          child: FlatButton(
-                              onPressed: () {
-                                // handleAppleSignIn();
-                              },
-                              color: Colors.grey[900],
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5)),
-                              child: appleSignInStarted == false
-                                  ? Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: const [
-                                        Icon(
-                                          FontAwesomeIcons.apple,
-                                          color: Colors.white,
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        Text(
-                                          'Sign In with Apple',
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.white),
-                                        )
-                                      ],
-                                    )
-                                  : const Center(
-                                      child: CircularProgressIndicator(
-                                          backgroundColor: Colors.white),
-                                    )),
-                        ),
+                  // SizedBox(
+                  //   height: 45,
+                  //   width: MediaQuery.of(context).size.width * 0.80,
+                  //   child: FlatButton(
+                  //       onPressed: () {
+                  //         // handleFacebookSignIn();
+                  //       },
+                  //       color: Colors.indigo,
+                  //       shape: RoundedRectangleBorder(
+                  //           borderRadius: BorderRadius.circular(5)),
+                  //       child: facebookSignInStarted == false
+                  //           ? Row(
+                  //               crossAxisAlignment: CrossAxisAlignment.center,
+                  //               mainAxisAlignment: MainAxisAlignment.center,
+                  //               children: const [
+                  //                 Icon(
+                  //                   FontAwesomeIcons.facebook,
+                  //                   color: Colors.white,
+                  //                 ),
+                  //                 SizedBox(
+                  //                   width: 10,
+                  //                 ),
+                  //                 Text(
+                  //                   'Sign In with Facebook',
+                  //                   style: TextStyle(
+                  //                       fontSize: 16,
+                  //                       fontWeight: FontWeight.w600,
+                  //                       color: Colors.white),
+                  //                 )
+                  //               ],
+                  //             )
+                  //           : const Center(
+                  //               child: CircularProgressIndicator(
+                  //                   backgroundColor: Colors.white),
+                  //             )),
+                  // ),
+                  // const SizedBox(
+                  //   height: 15,
+                  // ),
+                  // Platform.isAndroid
+                  //     ? Container()
+                  //     : SizedBox(
+                  //         height: 45,
+                  //         width: MediaQuery.of(context).size.width * 0.80,
+                  //         child: FlatButton(
+                  //             onPressed: () {
+                  //               // handleAppleSignIn();
+                  //             },
+                  //             color: Colors.grey[900],
+                  //             shape: RoundedRectangleBorder(
+                  //                 borderRadius: BorderRadius.circular(5)),
+                  //             child: appleSignInStarted == false
+                  //                 ? Row(
+                  //                     crossAxisAlignment:
+                  //                         CrossAxisAlignment.center,
+                  //                     mainAxisAlignment:
+                  //                         MainAxisAlignment.center,
+                  //                     children: const [
+                  //                       Icon(
+                  //                         FontAwesomeIcons.apple,
+                  //                         color: Colors.white,
+                  //                       ),
+                  //                       SizedBox(
+                  //                         width: 10,
+                  //                       ),
+                  //                       Text(
+                  //                         'Sign In with Apple',
+                  //                         style: TextStyle(
+                  //                             fontSize: 16,
+                  //                             fontWeight: FontWeight.w600,
+                  //                             color: Colors.white),
+                  //                       )
+                  //                     ],
+                  //                   )
+                  //                 : const Center(
+                  //                     child: CircularProgressIndicator(
+                  //                         backgroundColor: Colors.white),
+                  //                   )),
+                  //       ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05)
                 ],
               )),

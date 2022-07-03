@@ -200,7 +200,7 @@ class _PlaceDetailsState extends State<PlaceDetails> {
                   const SizedBox(
                     height: 10,
                   ),
-                  widget.data.facilities.isEmpty ? SizedBox() : 
+                  widget.data.facilities.isEmpty ? const SizedBox() : 
                   SizedBox(
                     height: 40,
                     child: ListView.builder(
@@ -249,7 +249,7 @@ class _PlaceDetailsState extends State<PlaceDetails> {
                     height: 15,
                   ),
                   OtherPlaces(
-                    categoryId: widget.data.province,
+                    categoryId: widget.data.category,
                     placeId: widget.data.id,
                   ),
                   const SizedBox(

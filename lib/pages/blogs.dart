@@ -25,7 +25,7 @@ class _BlogPageState extends State<BlogPage>
     with AutomaticKeepAliveClientMixin {
   ScrollController controller = ScrollController();
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  String _orderBy = 'loves';
+  String _orderBy = 'loveCount';
 
   @override
   void initState() {
@@ -89,7 +89,7 @@ class _BlogPageState extends State<BlogPage>
               onSelected: (value) {
                 setState(() {
                   if (value == 'popular') {
-                    _orderBy = 'loves';
+                    _orderBy = 'loveCount';
                   } else {
                     _orderBy = 'timestamp';
                   }

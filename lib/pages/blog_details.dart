@@ -65,7 +65,7 @@ class _BlogDetailsState extends State<BlogDetails> {
 
   handleShare() {
     Share.share(
-        '${widget.blogData.title}, To read more install ${Config().appName} App. https://play.google.com/store/apps/details?id=com.mrblab.travel_hour');
+        '${widget.blogData.title}, ${Config().appName} App. ${widget.blogData.sourceUrl}');
   }
 
   @override

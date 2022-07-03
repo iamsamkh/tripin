@@ -11,7 +11,6 @@ class OtherPlacesBloc extends ChangeNotifier{
  
 
   Future getData(String categoryId, String placeId) async {
-    _data.clear();
     QuerySnapshot rawData;
       rawData = await firestore
           .collection('placesN')

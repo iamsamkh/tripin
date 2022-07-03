@@ -29,7 +29,7 @@ class Blog {
       title: snap['title'],
       description: snap['description'],
       thumbnailImagelUrl: snap['image url'],
-      loves: snap['loves'],
+      loves: snap['loveCount'],
       sourceUrl: snap['source'],
       date: snap['date'],
       timestamp: snap['timestamp'], 

@@ -1,3 +1,38 @@
 https://ua4poje1el.execute-api.ap-south-1.amazonaws.com/prod/user/get-categories-pak-map/
 
 https://d3b4d950pk995t.cloudfront.net/Khadomi-Waterfall-2021-01-11T11-37-50.067Z.jpg
+
+readData(){
+    for(var temp in data){
+      List<String> facilities = [];
+      if(temp['places']['facilities'].isNotEmpty){
+        for(var f in temp['places']['facilities']){
+          facilities.add(f['title']);
+        }
+      }
+      final ref = _firestore.collection('placesN').doc();
+      Map<String, dynamic> map = {
+      'placeId' : ref.id,
+      'category': 'RAfmIJ2qid6zz8zAIwa7',
+      'facilities' : facilities,
+      'placeName' : temp['places']['placeName'],
+      'image' : ['https://d3b4d950pk995t.cloudfront.net/${temp['places']['image'][0]}'],
+      'description' : temp['places']['description'] ?? '',
+      'address' : temp['places']['address'] ?? '',
+      'city' : temp['places']['city'] ?? '',
+      'province' : temp['places']['province'],
+      'latitude' : double.parse(temp['places']['latitude']),
+      'longitude' : double.parse(temp['places']['longititude']),
+      'experienceCount' : 0,
+      'loveCount' : 0,
+      'questionsCount' : 0,
+      'storiesCount' : 0,
+      'dateAdded' : Timestamp.now(),
+      'status' : 'active',
+      'updateTime': null,
+      'uploaderId': 'admin',
+    };
+    ref.set(map);
+    }
+    print('Done');
+  }
