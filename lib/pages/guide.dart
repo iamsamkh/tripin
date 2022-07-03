@@ -1,339 +1,245 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:geo/geo.dart' as geo;
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
-import '../blocs/ads_bloc.dart';
-import '../models/colors.dart';
+// import 'package:location/location.dart';
+import 'package:tripin/utils/location_services.dart';
 import '../config/config.dart';
-import '../models/directions_model.dart';
 import '../models/place.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../utils/convert_map_icon.dart';
-import '../utils/map_util.dart';
-import 'package:provider/provider.dart';
 
 class GuidePage extends StatefulWidget {
-  final Place d;
-  const GuidePage({Key? key, required this.d}) : super(key: key);
+  final Place place;
+  const GuidePage({Key? key, required this.place}) : super(key: key);
 
   @override
-  _GuidePageState createState() => _GuidePageState();
+  State<GuidePage> createState() => GuidePageState();
 }
 
-class _GuidePageState extends State<GuidePage> {
-  late GoogleMapController mapController;
+class GuidePageState extends State<GuidePage> {
+  Completer<GoogleMapController> _controller = Completer();
+  Uint8List? _sourceIcon;
+  Uint8List? _destinationIcon;
 
-  final List<Marker> _markers = [];
-  Map data = {};
-  String distance = 'O km';
+  int _polylineIdVal = 1;
+  Set<Marker> _markers = Set<Marker>();
+  Set<Polyline> _polyline = Set<Polyline>();
 
-  // Map<PolylineId, Polyline> polylines = {};
-  // List<LatLng> polylineCoordinates = [];
-  // PolylinePoints polylinePoints = PolylinePoints();
-  Directions? _info;
+  String distance = 'Loading';
+  String duration = 'Loading';
 
-  late Uint8List _sourceIcon;
-  late Uint8List _destinationIcon;
+  @override
+  void initState() {
+    super.initState();
+    _setMarkerIcons().then((_) => determinePosition().then((value) {
+          if (value != null) {
+            placemarkFromCoordinates(value.latitude, value.longitude).then((placemart) =>  LocationService()
+                .getDirections(
+                    // '${value.latitude},${value.longitude}',
+                    placemart[0].name!,
+                    widget.place.name
+                    // '${widget.place.latitude},${widget.place.longitude}'
+                    )
+                .then((direction) {
+              _setMarker(
+                  LatLng(direction['start_location']['lat'],
+                      direction['start_location']['lng']),
+                  'You',
+                  _sourceIcon);
+              _setMarker(
+                  LatLng(direction['end_location']['lat'],
+                      direction['end_location']['lng']),
+                  widget.place.name,
+                  _destinationIcon);
+              _setPolyline(direction['polyline_decode']);
+              _goToMyLocation(
+                  LatLng(direction['start_location']['lat'],
+                      direction['start_location']['lng']),
+                  direction['bound_ne'],
+                  direction['bound_sw']);
+              setState(() {
+                distance = direction['distance'];
+                duration = direction['duration'];
+              });
+            }).catchError((_) {
+              print('error');
+            }));
+            
+          }
+        }));
+  }
 
-  Future getData() async {
-    await FirebaseFirestore.instance
-        .collection('placesN')
-        .doc(widget.d.id)
-        .collection('travel guide')
-        .doc(widget.d.id)
-        .get()
-        .then((DocumentSnapshot snap) {
-      setState(() {
-        data = snap.data() as Map<dynamic, dynamic>;
-      });
+  void _setMarker(LatLng point, String id, icon) {
+    setState(() {
+      _markers.add(Marker(
+        markerId: MarkerId(id),
+        infoWindow: InfoWindow(title: id),
+        position: point,
+        icon: BitmapDescriptor.fromBytes(icon),
+      ));
     });
   }
 
-  _setMarkerIcons() async {
+  void _setPolyline(List<PointLatLng> point) {
+    final String polylineIdVal = 'polyine_$_polylineIdVal';
+    _polylineIdVal++;
+
+    _polyline.add(Polyline(
+        polylineId: PolylineId(polylineIdVal),
+        width: 3,
+        color: Colors.green[800]!,
+        points: point
+            .map((point) => LatLng(point.latitude, point.longitude))
+            .toList()));
+  }
+
+  Future _setMarkerIcons() async {
     _sourceIcon = await getBytesFromAsset(Config().drivingMarkerIcon, 110);
     _destinationIcon =
         await getBytesFromAsset(Config().destinationMarkerIcon, 110);
   }
 
-  Future addMarker() async {
-    List m = [
-      Marker(
-          markerId: MarkerId(data['startpoint name']),
-          position: LatLng(data['startpoint lat'], data['startpoint lng']),
-          infoWindow: InfoWindow(title: data['startpoint name']),
-          icon: BitmapDescriptor.fromBytes(_sourceIcon)),
-      Marker(
-          markerId: MarkerId(data['endpoint name']),
-          position: LatLng(data['endpoint lat'], data['endpoint lng']),
-          infoWindow: InfoWindow(title: data['endpoint name']),
-          icon: BitmapDescriptor.fromBytes(_destinationIcon))
-    ];
-    setState(() {
-      for (var element in m) {
-        _markers.add(element);
-      }
-    });
+  Future<void> _goToMyLocation(LatLng point, Map<String, dynamic> boundsNe,
+      Map<String, dynamic> boundsSW) async {
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+            southwest: LatLng(boundsSW['lat'], boundsSW['lng']),
+            northeast: LatLng(boundsNe['lat'], boundsNe['lng'])),
+        25));
   }
 
-  // Future computeDistance() async {
-  //   var p1 = geo.LatLng(data['startpoint lat'], data['startpoint lng']);
-  //   var p2 = geo.LatLng(data['endpoint lat'], data['endpoint lng']);
-  //   double _distance = geo.computeDistanceBetween(p1, p2) / 1000;
-  //   setState(() {
-  //     distance = '${_distance.toStringAsFixed(2)} km';
-  //   });
-  // }
-  
-  static const String _baseUrl = 'https://maps.googleapis.com/maps/api/directions/json?';
-  Future<Directions> getDirections(LatLng origin, LatLng destination)async{
-    final response = await Dio().get(_baseUrl, queryParameters: {
-      'origin': '${origin.latitude},${origin.longitude}',
-      'destination': '${destination.latitude},${destination.longitude}',
-      'key': Config().mapAPIKey,
-    });
+  Future<dynamic> determinePosition() async {
+    Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
 
-    if(response.statusCode == 200) {
-      print(response.statusMessage);
-      return Directions.fromMap(response.data);
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the 
+    // App to enable the location services.
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale 
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      return Future.error('Location permissions are denied');
     }
-    throw('error');
   }
-  Future<void> temp()async{
-    final directions = await getDirections(LatLng(data['startpoint lat'], data['startpoint lng']), LatLng(data['endpoint lat'], data['endpoint lng']));
-    print(directions.polylinePoints);
-    setState(() {
-      _info = directions;
-    });
-  }
-  // Future _getPolyline() async {
-  //   PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-  //     Config().mapAPIKey,
-  //     PointLatLng(data['startpoint lat'], data['startpoint lng']),
-  //     PointLatLng(data['endpoint lat'], data['endpoint lng']),
-  //     travelMode: TravelMode.driving,
-  //   );
-  //   if (result.points.isNotEmpty) {
-  //     for (var point in result.points) {
-  //       polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-  //     }
-  //     print('PolyLine: $polylineCoordinates');
-  //   }
-  //   _addPolyLine();
-  // }
+  
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately. 
+    return Future.error(
+      'Location permissions are permanently denied, we cannot request permissions.');
+  } 
 
-  // _addPolyLine() {
-  //   PolylineId id = PolylineId("poly");
-  //   Polyline polyline = Polyline(
-  //       polylineId: id,
-  //       color: const Color.fromARGB(255, 40, 122, 198),
-  //       points: polylineCoordinates);
-  //   polylines[id] = polyline;
-  //   setState(() {});
-  // }
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  return await Geolocator.getCurrentPosition();
+}
+    // Location location = Location();
 
-  void animateCamera() {
-    mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        target: LatLng(data['startpoint lat'], data['startpoint lng']),
-        zoom: 8,
-        bearing: 120)));
-  }
+    // bool _serviceEnabled;
+    // PermissionStatus _permissionGranted;
+    // LocationData _locationData;
 
-  void onMapCreated(controller) {
-    controller.setMapStyle(MapUtils.mapStyles);
-    setState(() {
-      mapController = controller;
-    });
-  }
+    // _serviceEnabled = await location.serviceEnabled();
+    // if (!_serviceEnabled) {
+    //   _serviceEnabled = await location.requestService();
+    //   if (!_serviceEnabled) {
+    //     return null;
+    //   }
+    // }
 
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(milliseconds: 0)).then((value) async {
-      // context.read<AdsBloc>().initiateAds();
-    });
-    _setMarkerIcons();
-    getData().then((value) => addMarker().then((value) => temp().then((value) {
-          // _getPolyline();
-          // computeDistance();
-          animateCamera();
-        })));
-  }
-
-  Widget panelUI() {
-    return Column(
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              width: 30,
-              height: 5,
-              decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: const BorderRadius.all(Radius.circular(12.0))),
-            ),
-          ],
-        ),
-        const SizedBox(
-          height: 10.0,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              "travel guide",
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 20,
-              ),
-            ).tr(),
-          ],
-        ),
-        RichText(
-            text: TextSpan(
-                style: TextStyle(
-                    color: Colors.grey[800],
-                    fontSize: 15,
-                    fontWeight: FontWeight.normal),
-                text: 'estimated cost = '.tr(),
-                children: <TextSpan>[
-              TextSpan(
-                  style: TextStyle(
-                      color: Colors.grey[800],
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold),
-                  text: data['price'])
-            ])),
-        RichText(
-            text: TextSpan(
-                style: TextStyle(
-                    color: Colors.grey[800],
-                    fontSize: 15,
-                    fontWeight: FontWeight.normal),
-                text: 'distance = '.tr(),
-                children: <TextSpan>[
-              TextSpan(
-                  style: TextStyle(
-                      color: Colors.grey[800],
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold),
-                  text: distance)
-            ])),
-        Container(
-          margin: const EdgeInsets.only(top: 8, bottom: 8),
-          height: 3,
-          width: 170,
-          decoration: BoxDecoration(
-              color: Colors.blueAccent,
-              borderRadius: BorderRadius.circular(40)),
-        ),
-        Container(
-            padding: const EdgeInsets.all(15),
-            alignment: Alignment.centerLeft,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const Text(
-                  'steps',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
-                ).tr(),
-                Container(
-                  margin: const EdgeInsets.only(top: 8, bottom: 8),
-                  height: 3,
-                  width: 70,
-                  decoration: BoxDecoration(
-                      color: Colors.blueAccent,
-                      borderRadius: BorderRadius.circular(40)),
-                ),
-              ],
-            )),
-        Expanded(
-          child: data.isEmpty
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  itemCount: data['paths'].length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 15, right: 15),
-                      child: Row(
-                        children: <Widget>[
-                          Column(
-                            children: <Widget>[
-                              CircleAvatar(
-                                  radius: 15,
-                                  child: Text(
-                                    '${index + 1}',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  backgroundColor:
-                                      ColorList().guideColors[index]),
-                              Container(
-                                height: 90,
-                                width: 2,
-                                color: Colors.black12,
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          SizedBox(
-                            child: Expanded(
-                              child: Text(
-                                data['paths'][index],
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  },
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const SizedBox();
-                  },
-                ),
-        ),
-      ],
-    );
+    // _permissionGranted = await location.hasPermission();
+    // if (_permissionGranted == PermissionStatus.denied) {
+    //   _permissionGranted = await location.requestPermission();
+    //   if (_permissionGranted != PermissionStatus.granted) {
+    //     return null;
+    //   }
+    // }
+    // _locationData = await location.getLocation();
+    // return _locationData;
   }
 
   Widget panelBodyUI(h, w) {
-    return SizedBox(
-      width: w,
-      child: GoogleMap(
-        initialCameraPosition: Config().initialCameraPosition,
-        mapType: MapType.normal,
-        onMapCreated: (controller) => onMapCreated(controller),
-        markers: Set.from(_markers),
-        // polylines: Set<Polyline>.of(polylines.values),
-        polylines: {
-          if(_info != null)
-          Polyline(polylineId: const PolylineId('Polyline'),
-          color: Colors.red,
-          width: 5,
-          points: _info!.polylinePoints.map((e) => LatLng(e.latitude, e.longitude)).toList()
-          ),
-        },
-        compassEnabled: true,
-        myLocationEnabled: false,
-        zoomGesturesEnabled: true,
-        zoomControlsEnabled: false,
+    return Column(children: [
+      SizedBox(
+        width: w,
+        height: h * 0.8,
+        child: GoogleMap(
+          mapType: MapType.normal,
+          initialCameraPosition: Config().initialCameraPosition,
+          markers: _markers,
+          polylines: _polyline,
+          onMapCreated: (GoogleMapController controller) {
+            _controller.complete(controller);
+          },
+        ),
       ),
-    );
+      Column(
+        children: <Widget>[
+          const SizedBox(
+            height: 20.0,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                "travel guide",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                ),
+              ).tr(),
+            ],
+          ),
+          RichText(
+              text: TextSpan(
+                  style: TextStyle(
+                      color: Colors.grey[800],
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal),
+                  text: 'distance = '.tr(),
+                  children: <TextSpan>[
+                TextSpan(
+                    style: TextStyle(
+                        color: Colors.grey[800],
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                    text: distance)
+              ])),
+          RichText(
+              text: TextSpan(
+                  style: TextStyle(
+                      color: Colors.grey[800],
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal),
+                  text: 'Travel Time = '.tr(),
+                  children: <TextSpan>[
+                TextSpan(
+                    style: TextStyle(
+                        color: Colors.grey[800],
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                    text: duration)
+              ])),
+        ],
+      )
+    ]);
   }
 
   @override
@@ -343,24 +249,7 @@ class _GuidePageState extends State<GuidePage> {
     return Scaffold(
         body: SafeArea(
       child: Stack(children: <Widget>[
-        SlidingUpPanel(
-            minHeight: 125,
-            maxHeight: MediaQuery.of(context).size.height * 0.80,
-            backdropEnabled: true,
-            backdropOpacity: 0.2,
-            backdropTapClosesPanel: true,
-            isDraggable: true,
-            borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(15), topRight: Radius.circular(15)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                  color: Colors.grey[400]!, blurRadius: 4, offset: const Offset(1, 0))
-            ],
-            padding: const EdgeInsets.only(top: 15, left: 10, bottom: 0, right: 10),
-            panel: panelUI(),
-            body: 
-            panelBodyUI(h, w)
-            ),
+        panelBodyUI(h, w),
         Positioned(
           top: 15,
           left: 10,
@@ -389,35 +278,32 @@ class _GuidePageState extends State<GuidePage> {
                 const SizedBox(
                   width: 5,
                 ),
-                data.isEmpty
-                    ? Container()
-                    : Container(
-                        width: MediaQuery.of(context).size.width * 0.80,
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.grey, width: 0.5)),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 15, top: 10, bottom: 10, right: 15),
-                          child: Text(
-                            '${data['startpoint name']} - ${data['endpoint name']}',
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ),
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.80,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.grey, width: 0.5)),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        left: 15, top: 10, bottom: 10, right: 15),
+                    child: Text(
+                      'You - ${widget.place.name}',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ),
-        data.isEmpty 
-        // && polylines.isEmpty
-            ? const Align(
-                alignment: Alignment.center,
-                child: CircularProgressIndicator(),
-              )
-            : Container()
+        // data.isEmpty && polylines.isEmpty
+        //     ? const Align(
+        //         alignment: Alignment.center,
+        //         child: CircularProgressIndicator(),
+        //       )
+        //     : Container()
       ]),
     ));
   }

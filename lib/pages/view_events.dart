@@ -59,6 +59,7 @@ class _ViewEventsState extends State<ViewEvents>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    ToastContext().init(context); //
     final bb = context.watch<ViewEventBloc>();
 
     return Scaffold(

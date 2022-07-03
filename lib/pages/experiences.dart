@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import '../blocs/comments_bloc.dart';
 import '../blocs/internet_bloc.dart';
 import '../blocs/sign_in_bloc.dart';
-import '../models/comment.dart';
+import '../models/experience.dart';
 import '../utils/empty.dart';
 import '../utils/loading_cards.dart';
 import '../utils/sign_in_dialog.dart';
@@ -32,7 +32,7 @@ class _ExperiencesPageState extends State<ExperiencesPage> {
   DocumentSnapshot? _lastVisible;
   bool _isLoading = true;
   List<DocumentSnapshot> _snap = [];
-  List<Comment> _data = [];
+  List<Experience> _data = [];
   final scaffoldKey = GlobalKey<ScaffoldState>();
   var textCtrl = TextEditingController();
   bool? _hasData;
@@ -69,7 +69,7 @@ class _ExperiencesPageState extends State<ExperiencesPage> {
         setState(() {
           _isLoading = false;
           _snap.addAll(data.docs);
-          _data = _snap.map((e) => Comment.fromFirestore(e)).toList();
+          _data = _snap.map((e) => Experience.fromFirestore(e)).toList();
           print('blog reviews : ${_data.length}');
         });
       }
@@ -106,7 +106,7 @@ class _ExperiencesPageState extends State<ExperiencesPage> {
     }
   }
 
-  handleDelete(context, Comment d) {
+  handleDelete(context, Experience d) {
     final SignInBloc sb = Provider.of<SignInBloc>(context, listen: false);
     final ib = Provider.of<InternetBloc>(context, listen: false);
     showDialog(
@@ -333,7 +333,7 @@ class _ExperiencesPageState extends State<ExperiencesPage> {
     );
   }
 
-  Widget reviewList(Comment d) {
+  Widget reviewList(Experience d) {
     return Container(
         padding: EdgeInsets.only(top: 10, bottom: 10),
         decoration: BoxDecoration(

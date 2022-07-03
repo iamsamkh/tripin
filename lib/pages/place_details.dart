@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:tripin/utils/loading_cards.dart';
+import 'package:tripin/widgets/capsule.dart';
 import 'package:tripin/widgets/weather_card.dart';
 import 'package:weather/weather.dart';
 import '../blocs/bookmark_bloc.dart';
@@ -197,7 +198,20 @@ class _PlaceDetailsState extends State<PlaceDetails> {
                     ],
                   ),
                   const SizedBox(
-                    height: 30,
+                    height: 10,
+                  ),
+                  widget.data.facilities.isEmpty ? SizedBox() : 
+                  SizedBox(
+                    height: 40,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: widget.data.facilities.length,
+                      itemBuilder: (context, index) {
+                      return Capsule(val: widget.data.facilities[index]);
+                    } ),
+                  ),
+                  const SizedBox(
+                    height: 10,
                   ),
                   Html(data: '''${widget.data.description}''', style: {
                     'body': Style(

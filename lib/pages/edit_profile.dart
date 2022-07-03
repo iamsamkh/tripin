@@ -159,16 +159,16 @@ class _EditProfileState extends State<EditProfile> {
             SizedBox(
               height: 45,
               width: MediaQuery.of(context).size.width,
-              child: RaisedButton(
-                textColor: Colors.white,
-                color: Theme.of(context).primaryColor,
-                child: loading == true
+              child: loading == true
                     ? const Center(
                         child: CircularProgressIndicator(
                           backgroundColor: Colors.white,
                         ),
                       )
-                    : const Text(
+                    : RaisedButton(
+                textColor: Colors.white,
+                color: Theme.of(context).primaryColor,
+                child: const Text(
                         'update profile',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600),

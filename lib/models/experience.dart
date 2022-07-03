@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Comment {
+class Experience {
   String uid;
   String name;
   String imageUrl;
@@ -8,7 +8,7 @@ class Comment {
   String date;
   String reviewTime;
 
-  Comment(
+  Experience(
       {required this.uid,
       required this.name,
       required this.imageUrl,
@@ -16,8 +16,8 @@ class Comment {
       required this.date,
       required this.reviewTime});
 
-  factory Comment.fromFirestore(DocumentSnapshot snap) {
-    return Comment(
+  factory Experience.fromFirestore(DocumentSnapshot snap) {
+    return Experience(
       uid: snap['uid'],
       name: snap['name'],
       imageUrl: snap['image url'],
